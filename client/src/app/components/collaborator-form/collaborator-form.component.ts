@@ -28,6 +28,7 @@ export class CollaboratorFormComponent implements OnInit, OnChanges {
 
   @Input() collaboratorToEdit: Collaborator | null = null;
   @Output() collaboratorAdded = new EventEmitter<void>();
+  @Output() modalClosed = new EventEmitter<void>();
   @Output() collaboratorUpdated = new EventEmitter<void>();
 
   constructor(
@@ -85,5 +86,13 @@ export class CollaboratorFormComponent implements OnInit, OnChanges {
         next: () => this.collaboratorAdded.emit(),
       });
     }
+  }
+
+  onCancel(): void {
+    // Resetear el formulario
+    this.collaboratorForm.reset({ assignedTechOnboardingEvent: '' });
+    
+    // Emitir un evento para cerrar el modal (necesitas agregarlo también)
+    this.modalClosed.emit();
   }
 }

@@ -1,0 +1,78 @@
+
+ 
+ /* ===========================
+     HEADER DEL DASHBOARD
+     =========================== */
+  .dashboard-header {
+    margin-bottom: 2rem;
+  }
+  
+  .header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 2rem;
+  }
+  
+  .title-section {
+    flex: 1;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+    font-weight: 800;
+    color: var(--color-gray-900);
+    margin: 0 0 0.75rem 0;
+    line-height: 1.2;
+  }
+  
+  :host ::ng-deep app-breadcrumb {
+    display: block;
+  }
+  
+  .user-section {
+    flex-shrink: 0;
+  }
+  
+  .user-profile {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem;
+    background-color: var(--color-white);
+    border: 1px solid var(--color-gray-200);
+    border-radius: var(--border-radius-lg);
+    box-shadow: var(--shadow-sm);
+  }
+  
+  .avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--color-primary), var(--color-primary-hover));
+    color: var(--color-white);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.875rem;
+    letter-spacing: 0.025em;
+  }
+  
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.125rem;
+  }
+  
+  .user-name {
+    font-weight: 600;
+    color: var(--color-gray-900);
+    font-size: 0.875rem;
+  }
+  
+  .user-role {
+    font-size: 0.75rem;
+    color: var(--color-gray-500);
+  }
+  
