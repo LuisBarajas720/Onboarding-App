@@ -4,6 +4,7 @@ import { HttpClient } from '@angular/common/http';
 import localeEs from '@angular/common/locales/es';
 import { CalendarEvent, CalendarModule, CalendarView } from 'angular-calendar';
 import { addMonths, subMonths } from 'date-fns';
+import { Subject } from 'rxjs';
 
 registerLocaleData(localeEs);
 
@@ -30,6 +31,7 @@ export class CalendarViewComponent implements OnInit {
   view: CalendarView = CalendarView.Month;
   viewDate: Date = new Date();
   events: CalendarEvent[] = [];
+  refresh: Subject<any> = new Subject();
   locale: string = 'es';
 
   constructor(private http: HttpClient) {}
@@ -40,17 +42,23 @@ export class CalendarViewComponent implements OnInit {
 
   fetchOnboardingEvents(): void {
     this.http.get<OnboardingEvent[]>('/onboardings.json').subscribe(data => {
-      this.events = data.map(event => ({
-        title: event.title,
-        start: new Date(event.start),
-        end: new Date(event.end),
-        color: { primary: event.color, secondary: event.color + '33' },
-        allDay: true
-      }));
+      this.events = data.map(event => {
+        const startDate = new Date(event.start.replace(/-/g, '/'));
+        const endDate = new Date(event.end.replace(/-/g, '/'));
+
+        return {
+          title: event.title,
+          start: startDate,
+          end: endDate,
+          color: { primary: event.color, secondary: event.color + '33' },
+          allDay: true
+        };
+      });
+
+      this.refresh.next(null); // 🔁 Forzar redibujo
     });
   }
 
-  // Métodos de navegación que volvemos a añadir
   previousMonth(): void {
     this.viewDate = subMonths(this.viewDate, 1);
   }
