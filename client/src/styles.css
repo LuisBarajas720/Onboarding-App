@@ -2,16 +2,15 @@
    1. VARIABLES DE TEMA Y ESTILOS GLOBALES
    ================================================================= */
    :root {
-    /* Paleta de colores del tema Mixto "Slate & Indigo" */
     --font-family: 'Inter', sans-serif;
     --color-accent: #4f46e5;
     --color-accent-hover: #4338ca;
-    --color-background: #f3f4f6;    /* Fondo claro para el contenido */
-    --color-card-light: #ffffff;     /* Blanco para las tarjetas */
-    --color-sidebar-dark: #1f2937; /* Gris pizarra para la sidebar */
+    --color-background: #f3f4f6;
+    --color-card: #ffffff;
+    --color-sidebar-dark: #1f2937;
     --color-text-primary: #111827;
     --color-text-secondary: #6b7280;
-    --color-text-inverse: #e5e7eb;  /* Texto para fondos oscuros */
+    --color-text-inverse: #e5e7eb;
     --color-border: #e5e7eb;
   }
   
@@ -25,15 +24,13 @@
   }
   
   /* =================================================================
-     2. LAYOUT PRINCIPAL DE LA APLICACIÓN
+     2. LAYOUT PRINCIPAL DE LA APLICACIÓN (CORREGIDO)
      ================================================================= */
-  .app-container {
-    display: flex;
-  }
   
   main.content-area {
-    flex-grow: 1;
+    /* Le añadimos un margen a la izquierda igual al ancho de tu sidebar.
+       Esto empuja el contenido hacia la derecha, fuera de detrás del menú.
+       Ajusta el valor '250px' si el ancho de tu sidebar es diferente. */
+    margin-left: 298px;
     padding: 2.5rem;
-    height: 100vh;
-    overflow-y: auto;
   }

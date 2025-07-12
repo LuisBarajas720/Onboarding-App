@@ -10,6 +10,7 @@
     background-color: var(--color-sidebar-dark); /* Aplicamos el fondo oscuro */
     padding: 1.5rem;
     flex-shrink: 0;
+    position: fixed;
   }
   
   .sidebar-header {

@@ -1,36 +1,81 @@
-.calendar-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
+/* --- Estilos para la Tarjeta y el Encabezado --- */
+.card {
+  padding: 1.5rem;
+  overflow: hidden;
+}
+
+/* --- Rediseño Profesional de FullCalendar --- */
+:host ::ng-deep {
+  
+  /* --- Encabezado y Botones --- */
+  .fc .fc-toolbar.fc-header-toolbar {
     margin-bottom: 1.5rem;
   }
-  
-  .calendar-header h2 {
-    margin: 0;
+  .fc .fc-button {
+    background-color: transparent;
+    color: var(--color-text-secondary);
+    border: none;
+    text-transform: capitalize;
+    box-shadow: none;
+    font-weight: 500;
+  }
+  .fc .fc-button-primary:not(:disabled).fc-button-active,
+  .fc .fc-button-primary:not(:disabled):active {
+    background-color: #eef2ff;
+    color: var(--color-accent);
+    border-radius: 6px;
+  }
+  .fc .fc-toolbar-title {
     font-size: 1.5rem;
     font-weight: 700;
   }
   
-  .calendar-nav button {
-    border: 1px solid var(--color-border);
-    background-color: var(--color-card);
+  /* --- Estilos Generales del Calendario --- */
+  .fc {
+    font-family: var(--font-family);
+  }
+  .fc .fc-view-harness {
+    border: none;
+  }
+  .fc-col-header-cell {
+    border: none !important;
+    color: var(--color-text-secondary) !important;
+    font-weight: 500 !important;
+  }
+  .fc-daygrid-day {
+    border-color: var(--color-border) !important;
+  }
+  .fc .fc-daygrid-day.fc-day-today {
+    background-color: rgba(79, 70, 229, 0.05);
+  }
+
+  /* --- Vistas de Semana y Día (Estilo Teams) --- */
+  .fc-timegrid-slot-label {
+    border: none !important;
+    text-align: center;
     color: var(--color-text-secondary);
-    padding: 0.5rem 1rem;
-    border-radius: 6px;
-    cursor: pointer;
-    margin-left: 0.5rem;
-    transition: all 0.2s ease-in-out;
+    padding: 0 1rem !important;
   }
-  
-  .calendar-nav button:hover {
-    border-color: var(--color-text-secondary);
-    color: var(--color-text-primary);
+  .fc-timegrid-slot {
+    border-bottom: none !important;
+    border-top: 1px dotted var(--color-border) !important; /* Líneas punteadas sutiles */
   }
-  
-  mwl-calendar-month-view {
-    display: block;
-    background-color: var(--color-card);
-    border: 1px solid var(--color-border);
-    border-radius: 0.75rem;
-    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+  .fc-timegrid-col.fc-day-today {
+    background-color: rgba(79, 70, 229, 0.05); /* Resaltado para el día de hoy */
   }
+  .fc .fc-timegrid-now-indicator-line {
+    border-color: #ef4444 !important;
+    border-width: 2px !important;
+  }
+  .fc-timegrid-event {
+    border-radius: 4px !important;
+    padding: 4px 8px !important;
+    font-weight: 500 !important;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    border: none !important;
+  }
+  .fc-event-title-custom {
+    color: #ffffff;
+    font-size: 0.8rem;
+  }
+}

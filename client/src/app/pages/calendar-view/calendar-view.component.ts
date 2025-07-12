@@ -1,73 +1,71 @@
-import { Component, OnInit } from '@angular/core';
-import { CommonModule, DatePipe, registerLocaleData } from '@angular/common';
-import { HttpClient } from '@angular/common/http';
-import localeEs from '@angular/common/locales/es';
-import { CalendarEvent, CalendarModule, CalendarView } from 'angular-calendar';
-import { addMonths, subMonths } from 'date-fns';
-import { Subject } from 'rxjs';
-
-registerLocaleData(localeEs);
-
-interface OnboardingEvent {
-  title: string;
-  color: string;
-  start: string;
-  end: string;
-}
+import { Component, ViewChild } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { FullCalendarComponent, FullCalendarModule } from '@fullcalendar/angular';
+import { CalendarOptions, EventInput } from '@fullcalendar/core';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import timeGridPlugin from '@fullcalendar/timegrid';
+import listPlugin from '@fullcalendar/list';
+import multiMonthPlugin from '@fullcalendar/multimonth';
+import esLocale from '@fullcalendar/core/locales/es';
 
 @Component({
   selector: 'app-calendar-view',
   standalone: true,
-  imports: [
-    CommonModule,
-    DatePipe,
-    CalendarModule
-  ],
+  imports: [CommonModule, FullCalendarModule],
   templateUrl: './calendar-view.component.html',
   styleUrls: ['./calendar-view.component.css']
 })
-export class CalendarViewComponent implements OnInit {
+export class CalendarViewComponent {
+  
+  calendarOptions: CalendarOptions = {
+    plugins: [dayGridPlugin, timeGridPlugin, listPlugin, multiMonthPlugin],
+    initialView: 'dayGridMonth',
+    headerToolbar: {
+      left: 'prev,next today',
+      center: 'title',
+      right: 'dayGridMonth,timeGridWeek,timeGridDay,multiMonthYear'
+    },
+    locale: esLocale,
+    events: '/onboardings.json',
+    fixedWeekCount: false,
 
-  view: CalendarView = CalendarView.Month;
-  viewDate: Date = new Date();
-  events: CalendarEvent[] = [];
-  refresh: Subject<any> = new Subject();
-  locale: string = 'es';
+    // --- INICIO DE NUEVAS OPCIONES ---
 
-  constructor(private http: HttpClient) {}
+    // 1. Soluciona los múltiples scrollbars.
+    // El calendario tendrá una altura máxima y su propio scroll interno.
+    height: '80vh', 
 
-  ngOnInit(): void {
-    this.fetchOnboardingEvents();
-  }
+    // 2. Elimina la fila de "todo el día" en vistas de semana y día.
+    allDaySlot: false,
 
-  fetchOnboardingEvents(): void {
-    this.http.get<OnboardingEvent[]>('/onboardings.json').subscribe(data => {
-      this.events = data.map(event => {
-        const startDate = new Date(event.start.replace(/-/g, '/'));
-        const endDate = new Date(event.end.replace(/-/g, '/'));
+    // 3. Configura el formato de hora a 12h (AM/PM).
+    // @ts-ignore
+    hour12: true,
+    slotLabelFormat: {
+      hour: 'numeric',
+      minute: '2-digit',
+      meridiem: 'short'
+    },
+    eventTimeFormat: {
+      hour: 'numeric',
+      minute: '2-digit',
+      meridiem: 'short'
+    },
 
-        return {
-          title: event.title,
-          start: startDate,
-          end: endDate,
-          color: { primary: event.color, secondary: event.color + '33' },
-          allDay: true
-        };
-      });
+    // --- FIN DE NUEVAS OPCIONES ---
 
-      this.refresh.next(null); // 🔁 Forzar redibujo
-    });
-  }
+    eventDataTransform: (eventInfo: EventInput) => {
+      const endDate = new Date(eventInfo.end as string);
+      endDate.setDate(endDate.getDate() + 1);
+      return { ...eventInfo, end: endDate, backgroundColor: eventInfo.color, borderColor: eventInfo.color };
+    },
 
-  previousMonth(): void {
-    this.viewDate = subMonths(this.viewDate, 1);
-  }
+    eventContent: (eventInfo) => {
+      return { html: `<span class="fc-event-title-custom">${eventInfo.event.title}</span>` };
+    }
+  };
 
-  today(): void {
-    this.viewDate = new Date();
-  }
+  @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
 
-  nextMonth(): void {
-    this.viewDate = addMonths(this.viewDate, 1);
-  }
+  constructor() {}
 }

@@ -1,26 +1,8 @@
 <h1 class="page-title">Calendario de Eventos</h1>
-<p class="page-subtitle">Visualiza los próximos onboardings técnicos programados.</p>
+<p class="page-subtitle">Visualiza y gestiona los próximos onboardings técnicos programados.</p>
 
 <article class="card">
-  <div class="calendar-header">
-    <h2>{{ viewDate | date:'LLLL yyyy':'':'es' }}</h2>
-    <div class="calendar-nav">
-      <button (click)="previousMonth()">Anterior</button>
-      <button (click)="today()">Hoy</button>
-      <button (click)="nextMonth()">Siguiente</button>
-    </div>
-  </div>
-
-  <div [ngSwitch]="view">
-    <mwl-calendar-month-view
-      *ngSwitchCase="'month'"
-      [viewDate]="viewDate"
-      [events]="events"
-      [refresh]="refresh"
-      [weekStartsOn]="1"
-      [locale]="locale"
-      [activeDayIsOpen]="false"
-    >
-    </mwl-calendar-month-view>
+  <div class="calendar-container">
+    <full-calendar [options]="calendarOptions"></full-calendar>
   </div>
 </article>
