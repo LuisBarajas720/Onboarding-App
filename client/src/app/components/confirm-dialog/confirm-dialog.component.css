@@ -1,0 +1,47 @@
+.dialog-container {
+    text-align: center;
+  }
+  
+  .dialog-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+  }
+  
+  .dialog-message {
+    color: var(--color-text-secondary);
+    margin-bottom: 2rem;
+  }
+  
+  .dialog-actions {
+    display: flex;
+    justify-content: center;
+    gap: 1rem;
+  }
+  
+  .dialog-actions button {
+    border: none;
+    padding: 0.75rem 1.5rem;
+    border-radius: 6px;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+  }
+  
+  .btn-secondary {
+    background-color: #e5e7eb;
+    color: #374151;
+  }
+  .btn-secondary:hover {
+    background-color: #d1d5db;
+  }
+  
+  .btn-danger {
+    background-color: #ef4444; /* Rojo */
+    color: #ffffff;
+  }
+  .btn-danger:hover {
+    background-color: #dc2626; /* Rojo oscuro */
+  }

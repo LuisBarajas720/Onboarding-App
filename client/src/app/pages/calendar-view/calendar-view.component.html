@@ -1,0 +1,23 @@
+<h1 class="page-title">Calendario de Eventos</h1>
+<p class="page-subtitle">Visualiza los próximos onboardings técnicos programados.</p>
+
+<article class="card">
+  <div class="calendar-header">
+    <h2>{{ viewDate | date:'LLLL yyyy':'':'es' }}</h2>
+    <div class="calendar-nav">
+      <button (click)="previousMonth()">Anterior</button>
+      <button (click)="today()">Hoy</button>
+      <button (click)="nextMonth()">Siguiente</button>
+    </div>
+  </div>
+
+  <div [ngSwitch]="view">
+    <mwl-calendar-month-view
+      *ngSwitchCase="'month'"
+      [viewDate]="viewDate"
+      [events]="events"
+      [weekStartsOn]="1"
+    >
+    </mwl-calendar-month-view>
+  </div>
+</article>

@@ -1,0 +1,7 @@
+<div class="click-catcher" (click)="close()"></div>
+
+<div class="modal-content" (click)="$event.stopPropagation()">
+  <button class="modal-close-btn" (click)="close()">×</button>
+  
+  <ng-content></ng-content>
+</div>

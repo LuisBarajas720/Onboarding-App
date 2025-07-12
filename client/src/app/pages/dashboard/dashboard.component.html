@@ -1,0 +1,97 @@
+<div class="dashboard-header">
+  <div>
+    <h1 class="page-title">Dashboard</h1>
+    <p class="page-subtitle">Gestiona los colaboradores y su proceso de onboarding.</p>
+  </div>
+  <button class="add-btn" (click)="openAddModal()">Agregar Colaborador</button>
+</div>
+
+<div class="filters-container card">
+  <div class="filter-group">
+    <label for="welcome-filter">Filtrar por Onboarding Bienvenida:</label>
+    <select id="welcome-filter" [(ngModel)]="welcomeFilter" (ngModelChange)="applyFilters()">
+      <option value="all">Todos</option>
+      <option value="completed">Completado</option>
+      <option value="pending">Pendiente</option>
+    </select>
+  </div>
+  <div class="filter-group">
+    <label for="tech-filter">Filtrar por Onboarding Técnico:</label>
+    <select id="tech-filter" [(ngModel)]="techFilter" (ngModelChange)="applyFilters()">
+      <option value="all">Todos</option>
+      <option value="completed">Completado</option>
+      <option value="pending">Pendiente</option>
+    </select>
+  </div>
+  <button (click)="clearFilters()">Limpiar Filtros</button>
+</div>
+
+<article class="card">
+  <h3>Lista de Colaboradores</h3>
+  <table>
+    <thead>
+      <tr>
+        <th>Nombre Completo</th>
+        <th>Correo</th>
+        <th>Fecha de Ingreso</th>
+        <th>Onboarding Técnico Asignado</th> <th>Bienvenida</th>
+        <th>Técnico</th>
+        <th>Acciones</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let collaborator of collaborators">
+        <td>{{ collaborator.fullName }}</td>
+        <td>{{ collaborator.email }}</td>
+        <td>{{ collaborator.startDate }}</td>
+        <td>{{ collaborator.assignedTechOnboardingEvent || 'N/A' }}</td>
+        <td>
+          <button
+            class="status-badge"
+            [ngClass]="{'status-completed': collaborator.welcomeOnboardingStatus, 'status-pending': !collaborator.welcomeOnboardingStatus}"
+            (click)="onStatusChange(collaborator, 'welcome')">
+            {{ collaborator.welcomeOnboardingStatus ? 'Completado' : 'Pendiente' }}
+          </button>
+        </td>
+        <td>
+          <button
+            class="status-badge"
+            [ngClass]="{'status-completed': collaborator.techOnboardingStatus, 'status-pending': !collaborator.techOnboardingStatus}"
+            (click)="onStatusChange(collaborator, 'tech')">
+            {{ collaborator.techOnboardingStatus ? 'Completado' : 'Pendiente' }}
+          </button>
+        </td>
+        <td>
+          <button class="action-btn btn-edit" (click)="onEdit(collaborator)" title="Editar">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" /></svg>
+          </button>
+          <button class="action-btn btn-delete" (click)="onDelete(collaborator.id)" title="Eliminar">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" width="20" height="20"><path stroke-linecap="round" stroke-linejoin="round" d="m14.74 9-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 0 1-2.244 2.077H8.084a2.25 2.25 0 0 1-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 0 0-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 0 1 3.478-.397m7.5 0v-.916c0-1.18-.91-2.134-2.036-2.134H8.716C7.596 2.345 6.686 3.299 6.686 4.48v.916m7.5 0a48.667 48.667 0 0 0-7.5 0" /></svg>
+          </button>
+        </td>
+      </tr>
+      <tr *ngIf="collaborators.length === 0">
+        <td colspan="7" style="text-align: center; padding: 2rem;">No hay colaboradores para mostrar.</td>
+      </tr>
+    </tbody>
+  </table>
+</article>
+
+<app-modal [isOpen]="isModalOpen" (modalClose)="closeModal()">
+  <app-collaborator-form
+    *ngIf="isModalOpen"
+    [collaboratorToEdit]="collaboratorToEdit"
+    (collaboratorAdded)="onFormSubmitSuccess()"
+    (collaboratorUpdated)="onFormSubmitSuccess()">
+  </app-collaborator-form>
+</app-modal>
+
+<app-modal [isOpen]="showDeleteConfirmModal" (modalClose)="closeDeleteModal()">
+  <app-confirm-dialog
+    *ngIf="showDeleteConfirmModal"
+    title="Confirmar Eliminación"
+    message="¿Estás seguro de que quieres eliminar a este colaborador? Esta acción no se puede deshacer."
+    (confirm)="handleDeleteConfirm()"
+    (cancel)="closeDeleteModal()">
+  </app-confirm-dialog>
+</app-modal>

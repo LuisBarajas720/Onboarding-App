@@ -1,0 +1,32 @@
+<form [formGroup]="collaboratorForm" (ngSubmit)="onSubmit()">
+  <h3>{{ collaboratorToEdit ? 'Actualizar Colaborador' : 'Agregar Nuevo Colaborador' }}</h3>
+
+  <div>
+    <label for="fullName">Nombre Completo:</label>
+    <input id="fullName" type="text" formControlName="fullName">
+  </div>
+
+  <div>
+    <label for="email">Correo Electrónico:</label>
+    <input id="email" type="email" formControlName="email">
+  </div>
+
+  <div>
+    <label for="startDate">Fecha de Ingreso:</label>
+    <input id="startDate" type="date" formControlName="startDate">
+  </div>
+
+  <div>
+    <label for="assignedTechOnboardingEvent">Onboarding Técnico Asignado:</label>
+    <select id="assignedTechOnboardingEvent" formControlName="assignedTechOnboardingEvent">
+      <option value="">-- Ninguno --</option>
+      <option *ngFor="let event of onboardingEvents" [value]="event.title">
+        {{ event.title }}
+      </option>
+    </select>
+  </div>
+
+  <button type="submit" [disabled]="collaboratorForm.invalid">
+    {{ collaboratorToEdit ? 'Actualizar Colaborador' : 'Agregar Colaborador' }}
+  </button>
+</form>

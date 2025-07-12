@@ -1,0 +1,53 @@
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
+    font-weight: 700; /* Letra más gruesa */
+    margin: 0;
+    color: var(--color-text-primary); /* Color de texto principal */
+  }
+  
+  label {
+    font-weight: 500;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    display: block;
+    color: var(--color-text-primary); /* Color de texto principal */
+  }
+  
+  input {
+    display: block;
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background-color: #ffffff;
+    color: var(--color-text-primary);
+    font-family: inherit;
+    font-size: 1rem;
+  }
+  
+  button {
+    border: none;
+    padding: 0.85rem 1.5rem;
+    border-radius: 6px;
+    background-color: var(--color-accent);
+    color: #ffffff;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+  }
+  
+  button:hover {
+    background-color: var(--color-accent-hover);
+  }
+  
+  button:disabled {
+    background-color: #9ca3af;
+    cursor: not-allowed;
+  }

@@ -1,0 +1,58 @@
+:host {
+    display: block; /* Asegura que el componente se renderice como un bloque */
+  }
+  
+  .sidebar-nav {
+    display: flex;
+    flex-direction: column; /* La regla que mantiene el menú vertical */
+    width: 250px;
+    height: 100vh;
+    background-color: var(--color-sidebar-dark); /* Aplicamos el fondo oscuro */
+    padding: 1.5rem;
+    flex-shrink: 0;
+  }
+  
+  .sidebar-header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2.5rem;
+  }
+  
+  .logo {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .app-title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #ffffff; /* Texto blanco para alto contraste */
+  }
+  
+  .nav-links {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .nav-links a {
+    display: block;
+    padding: 0.75rem 1rem;
+    margin-bottom: 0.5rem;
+    border-radius: 6px;
+    text-decoration: none;
+    color: var(--color-text-inverse); /* Texto claro para el fondo oscuro */
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .nav-links a:hover {
+    background-color: rgba(79, 70, 229, 0.1); /* Hover sutil */
+    color: #ffffff;
+  }
+  
+  .nav-links a.active {
+    background-color: var(--color-accent);
+    color: #ffffff;
+  }

@@ -1,0 +1,196 @@
+/* --- 1. Encabezado del Dashboard --- */
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1.5rem;
+  }
+  
+  .page-title {
+    font-size: 2rem;
+    font-weight: 700;
+    margin: 0;
+    color: var(--color-text-primary);
+  }
+  
+  .page-subtitle {
+    font-size: 1rem;
+    color: var(--color-text-secondary);
+    margin-top: 0.25rem;
+  }
+  
+  .add-btn {
+    border: none;
+    padding: 0.85rem 1.5rem;
+    border-radius: 6px;
+    background-color: var(--color-accent);
+    color: #ffffff;
+    font-weight: 500;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    flex-shrink: 0;
+  }
+  
+  .add-btn:hover {
+    background-color: var(--color-accent-hover);
+  }
+  
+  
+  /* --- 2. Tarjetas y Contenedores --- */
+  .card {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    padding: 2rem;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05);
+    margin-bottom: 2rem;
+  }
+  
+  .card h3 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    color: var(--color-text-primary);
+  }
+  
+  
+  /* --- 3. Contenedor de Filtros --- */
+  .filters-container {
+    display: flex;
+    align-items: flex-end;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+    padding: 1.5rem;
+  }
+  
+  .filter-group {
+    flex-grow: 1;
+  }
+  
+  .filters-container label {
+    font-weight: 500;
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+  
+  .filters-container select {
+    width: 100%;
+    padding: 0.70rem;
+    border: 1px solid var(--color-border);
+    border-radius: 6px;
+    background-color: var(--color-card);
+    height: 41px;
+  }
+  
+  .filters-container button {
+    padding: 0.70rem 1.5rem;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-card);
+    color: var(--color-text-secondary);
+    height: fit-content;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  .filters-container button:hover {
+    border-color: var(--color-text-secondary);
+    color: var(--color-text-primary);
+  }
+  
+  
+  /* --- 4. Tabla de Colaboradores --- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  th {
+    text-align: center;
+    padding: 0.75rem 1rem;
+    color: var(--color-text-secondary);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    border-bottom: 1px solid var(--color-border);
+  }
+  
+  td {
+    padding: 1rem 1rem;
+    vertical-align: middle;
+    text-align: center;
+    border-bottom: 1px solid var(--color-border);
+    font-size: 0.875rem;
+    color: var(--color-text-primary);
+  }
+  
+  tr:last-child td {
+    border-bottom: none;
+  }
+  
+  /* --- 5. Estilos para Indicador de Estado --- */
+  .status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 9999px;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    border: none;
+    cursor: pointer;
+    min-width: 110px;
+  }
+  
+  .status-completed {
+    background-color: #dcfce7 !important;
+    color: #166534 !important;
+  }
+  
+  .status-pending {
+    background-color: #ffedd5 !important;
+    color: #9a3412 !important;
+  }
+  
+  
+ /* --- 6. Estilos para Botones de Acción (CON ICONOS) --- */
+.action-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px; /* Botón cuadrado */
+    height: 36px;
+    padding: 0;
+    border: 1px solid transparent;
+    background-color: transparent;
+    color: var(--color-text-secondary);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease-in-out;
+  }
+  
+  /* Tamaño del icono SVG dentro del botón */
+  .action-btn svg {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+  
+  /* Espaciado entre los botones */
+  .action-btn:not(:last-child) {
+    margin-right: 0.5rem;
+  }
+  
+  /* Estilo para el botón de Editar */
+  .action-btn.btn-edit:hover {
+    background-color: #eef2ff; /* Fondo índigo muy claro */
+    color: #4338ca; /* Color de acento oscuro */
+  }
+  
+  /* Estilo para el botón de Eliminar */
+  .action-btn.btn-delete:hover {
+    background-color: #fee2e2; /* Fondo rojo muy claro */
+    color: #b91c1c; /* Rojo oscuro */
+  }
+  
