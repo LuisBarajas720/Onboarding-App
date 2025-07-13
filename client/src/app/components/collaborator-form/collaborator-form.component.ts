@@ -1,16 +1,11 @@
-import { Component, EventEmitter, OnInit, Output, Input, OnChanges } from '@angular/core';
+import { Component, EventEmitter, OnInit, Output, Input, OnChanges, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CollaboratorService } from '../../services/collaborator.service';
+import { OnboardingEventService } from '../../services/onboarding-event.service';
 import { CommonModule } from '@angular/common';
 import { Collaborator } from '../../models/collaborator.model';
-import { HttpClient } from '@angular/common/http';
-
-// Interfaz para tipar los datos de los eventos del JSON
-interface OnboardingEvent {
-  title: string;
-  start: string;
-  end: string;
-}
+import { OnboardingEvent } from '../../models/onboarding-event.model';
+import { Subject, takeUntil } from 'rxjs';
 
 @Component({
   selector: 'app-collaborator-form',
@@ -22,9 +17,11 @@ interface OnboardingEvent {
   templateUrl: './collaborator-form.component.html',
   styleUrl: './collaborator-form.component.css'
 })
-export class CollaboratorFormComponent implements OnInit, OnChanges {
+export class CollaboratorFormComponent implements OnInit, OnChanges, OnDestroy {
+  private readonly destroy$ = new Subject<void>();
+  
   collaboratorForm: FormGroup;
-  onboardingEvents: OnboardingEvent[] = []; // Array para guardar los eventos
+  onboardingEvents: OnboardingEvent[] = [];
 
   @Input() collaboratorToEdit: Collaborator | null = null;
   @Output() collaboratorAdded = new EventEmitter<void>();
@@ -34,32 +31,44 @@ export class CollaboratorFormComponent implements OnInit, OnChanges {
   constructor(
     private fb: FormBuilder,
     private collaboratorService: CollaboratorService,
-    private http: HttpClient // Inyectamos HttpClient
+    private eventService: OnboardingEventService
   ) {
     this.collaboratorForm = this.fb.group({
       fullName: ['', Validators.required],
       email: ['', [Validators.required, Validators.email]],
       startDate: ['', Validators.required],
-      // Renombramos el campo y lo inicializamos para el desplegable
       assignedTechOnboardingEvent: ['']
     });
   }
 
   ngOnInit(): void {
-    // Al iniciar, cargamos los eventos desde el archivo JSON
-    this.http.get<OnboardingEvent[]>('/onboardings.json').subscribe(data => {
-      this.onboardingEvents = data;
-    });
+    this.loadAvailableEvents();
   }
 
   ngOnChanges(): void {
-    // Cuando cambia el colaborador a editar, actualizamos el formulario
     if (this.collaboratorToEdit) {
       this.collaboratorForm.patchValue(this.collaboratorToEdit);
     } else {
-      // Si no hay colaborador para editar (modo creación), reseteamos el formulario
       this.collaboratorForm.reset({ assignedTechOnboardingEvent: '' });
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
+  }
+
+  private loadAvailableEvents(): void {
+    this.eventService.getActiveEvents()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (events) => {
+          this.onboardingEvents = events;
+        },
+        error: (error) => {
+          console.error('Error al cargar eventos:', error);
+        }
+      });
   }
 
   onSubmit(): void {
@@ -68,7 +77,8 @@ export class CollaboratorFormComponent implements OnInit, OnChanges {
     }
 
     const formValue = { ...this.collaboratorForm.value };
-    // Si se selecciona "Ninguno", el valor es ''. Lo convertimos a null para la base de datos.
+    
+    // Si se selecciona vacío, convertir a null
     if (formValue.assignedTechOnboardingEvent === '') {
       formValue.assignedTechOnboardingEvent = null;
     }
@@ -79,20 +89,33 @@ export class CollaboratorFormComponent implements OnInit, OnChanges {
         .updateCollaborator(this.collaboratorToEdit.id, formValue)
         .subscribe({
           next: () => this.collaboratorUpdated.emit(),
+          error: (error) => {
+            console.error('Error al actualizar colaborador:', error);
+          }
         });
     } else {
       // Modo Creación
       this.collaboratorService.createCollaborator(formValue).subscribe({
         next: () => this.collaboratorAdded.emit(),
+        error: (error) => {
+          console.error('Error al crear colaborador:', error);
+        }
       });
     }
   }
 
   onCancel(): void {
-    // Resetear el formulario
     this.collaboratorForm.reset({ assignedTechOnboardingEvent: '' });
-    
-    // Emitir un evento para cerrar el modal (necesitas agregarlo también)
     this.modalClosed.emit();
+  }
+
+  // Método helper para mostrar información del evento
+  getEventDisplayText(event: OnboardingEvent): string {
+    const startDate = new Date(event.startDate).toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+    return `${event.title} (${startDate})`;
   }
 }

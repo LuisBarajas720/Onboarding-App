@@ -22,13 +22,20 @@
     </div>
 
     <div class="form-group">
-      <label for="assignedTechOnboardingEvent">Onboarding Técnico Asignado</label>
-      <select id="assignedTechOnboardingEvent" formControlName="assignedTechOnboardingEvent">
-        <option value="">-- Seleccionar evento --</option>
-        <option *ngFor="let event of onboardingEvents" [value]="event.title">
-          {{ event.title }}
+      <label for="assignedTechOnboardingEvent">Evento Técnico Asignado</label>
+      <select id="assignedTechOnboardingEvent" formControlName="assignedTechOnboardingEvent" class="form-select">
+        <option value="">-- Sin asignar --</option>
+        <option 
+          *ngFor="let event of onboardingEvents" 
+          [value]="event.title"
+          [style.background-color]="event.color + '20'"
+          [style.border-left]="'4px solid ' + event.color">
+          {{ getEventDisplayText(event) }}
         </option>
       </select>
+      <small class="form-hint">
+        Selecciona un evento de onboarding técnico para este colaborador
+      </small>
     </div>
 
     <div class="form-actions">

@@ -1,0 +1,98 @@
+<app-page-header title="Reportes de Onboarding"></app-page-header>
+
+
+  <!-- Sección de Alertas -->
+  <section class="alerts-section">
+    <div class="alerts-card">
+      <div class="card-header">
+        <h3>
+          <i class="fas fa-bell"></i>
+          Sistema de Alertas
+        </h3>
+        <p>Verifica y envía alertas automáticas para eventos técnicos próximos (7 días o menos)</p>
+      </div>
+      
+      <div class="card-content">
+        <button 
+          class="btn btn-primary" 
+          (click)="checkAlerts()" 
+          [disabled]="loading">
+          <i class="fas fa-{{ loading ? 'spinner fa-spin' : 'search' }}"></i>
+          {{ loading ? 'Verificando...' : 'Verificar y Enviar Alertas' }}
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Resultados de Alertas -->
+  <section class="results-section" *ngIf="alertsResult">
+    <div class="results-card">
+      <div class="results-header">
+        <h3>
+          <i class="fas fa-clipboard-list"></i>
+          Resultado de la Verificación
+        </h3>
+        <div class="summary-info">
+          <span class="check-date">{{ formatDate(alertsResult.checkDate) }}</span>
+          <span class="total-alerts" 
+                [class.no-alerts]="alertsResult.totalAlerts === 0"
+                [class.has-alerts]="alertsResult.totalAlerts > 0">
+            {{ alertsResult.totalAlerts }} alerta(s)
+          </span>
+        </div>
+      </div>
+
+      <!-- Lista de alertas enviadas -->
+      <div class="alerts-content" *ngIf="alertsResult.totalAlerts > 0">
+        <h4>📧 Alertas Enviadas por Correo:</h4>
+        <div class="alerts-grid">
+          <div class="alert-card" *ngFor="let alert of alertsResult.alerts">
+            <div class="alert-header">
+              <div class="collaborator-info">
+                <h5>{{ alert.collaboratorName }}</h5>
+                <span class="email">{{ alert.email }}</span>
+              </div>
+              <div class="days-badge" [class]="'priority-' + (alert.daysUntil <= 2 ? 'high' : 'medium')">
+                {{ alert.daysUntil }} día(s)
+              </div>
+            </div>
+            <div class="alert-details">
+              <div class="event-info">
+                <i class="fas fa-calendar"></i>
+                <span>{{ alert.eventTitle }}</span>
+              </div>
+              <div class="date-info">
+                <i class="fas fa-clock"></i>
+                <span>{{ formatDate(alert.eventDate) }}</span>
+              </div>
+            </div>
+            <div class="alert-status">
+              <span class="status-sent">
+                <i class="fas fa-check"></i>
+                Enviado
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sin alertas -->
+      <div class="no-alerts-content" *ngIf="alertsResult.totalAlerts === 0">
+        <div class="success-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h4>¡Excelente! No hay alertas pendientes</h4>
+        <p>Todos los colaboradores están al día con sus eventos de onboarding técnico.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Error -->
+  <div class="error-banner" *ngIf="error">
+    <i class="fas fa-exclamation-triangle"></i>
+    <span>{{ error }}</span>
+    <button class="btn btn-sm" (click)="checkAlerts()">
+      <i class="fas fa-redo"></i>
+      Reintentar
+    </button>
+  </div>

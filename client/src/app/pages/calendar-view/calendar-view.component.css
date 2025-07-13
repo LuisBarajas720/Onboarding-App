@@ -177,35 +177,6 @@
     margin: 0.25rem;
   }
   
-  /* --- Vista de tiempo --- */
-  .fc-timegrid-slot-label {
-    border: none !important;
-    text-align: right !important;
-    color: #6b7280 !important;
-    padding: 0 1rem !important;
-    font-size: 0.75rem !important;
-    font-weight: 500 !important;
-  }
-  
-  .fc-timegrid-slot {
-    border-bottom: none !important;
-    border-top: 1px solid #f1f5f9 !important;
-  }
-  
-  .fc-timegrid-slot:nth-child(even) {
-    background-color: rgba(248, 250, 252, 0.5);
-  }
-  
-  .fc-timegrid-col.fc-day-today {
-    background-color: rgba(59, 130, 246, 0.03) !important;
-  }
-  
-  .fc .fc-timegrid-now-indicator-line {
-    border-color: var(--calendar-danger) !important;
-    border-width: 2px !important;
-    box-shadow: 0 0 4px rgba(239, 68, 68, 0.3);
-  }
-  
   /* --- Eventos mejorados --- */
   .fc-event {
     border: none !important;
@@ -232,6 +203,16 @@
     white-space: nowrap !important;
   }
   
+  /* --- Descripción de eventos (solo título) --- */
+  .fc-event-description {
+    font-size: 0.75rem !important;
+    opacity: 0.9 !important;
+    margin-top: 0.125rem !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+    white-space: nowrap !important;
+  }
+  
   /* --- Colores de eventos predefinidos --- */
   .fc-event[style*="#10b981"] {
     background: linear-gradient(135deg, #10b981, #059669) !important;
@@ -247,19 +228,6 @@
   
   .fc-event[style*="#3b82f6"] {
     background: linear-gradient(135deg, #3b82f6, #2563eb) !important;
-  }
-  
-  /* --- Vista de lista --- */
-  .fc-list-event {
-    border-left: 4px solid var(--calendar-primary) !important;
-    border-radius: 0 6px 6px 0 !important;
-    margin-bottom: 0.5rem !important;
-    background: white !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1) !important;
-  }
-  
-  .fc-list-event:hover {
-    background: #f8fafc !important;
   }
   
   /* --- Vista de múltiples meses --- */

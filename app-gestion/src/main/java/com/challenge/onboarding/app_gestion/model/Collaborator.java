@@ -1,5 +1,6 @@
 package com.challenge.onboarding.app_gestion.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.time.LocalDate;
@@ -30,4 +31,12 @@ public class Collaborator {
 
     @Column(name = "assigned_tech_onboarding_event")
     private String assignedTechOnboardingEvent;
+
+    @Column(name = "assigned_event_id")
+    private Long assignedEventId;
+
+    @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "assigned_event_id", insertable = false, updatable = false)
+    private OnboardingEvent assignedEvent;
 }

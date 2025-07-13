@@ -1,0 +1,82 @@
+<app-page-header title="Gestión de Eventos de Onboarding"></app-page-header>
+
+<section class="events-section">
+  <div class="events-card">
+    <div class="events-header">
+      <div class="header-info">
+        <h3>Eventos de Onboarding</h3>
+        <span class="events-count">{{ events.length }} evento(s)</span>
+      </div>
+      <button class="add-btn primary-btn" (click)="openAddModal()">
+        <i class="fas fa-plus"></i>
+        Agregar Evento
+      </button>
+    </div>
+    
+    <div class="table-wrapper">
+      <table class="events-table">
+        <thead>
+          <tr>
+            <th>Evento</th>
+            <th>Fecha</th>
+            <th>Participantes</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let event of events" class="event-row">
+            <td>
+              <div class="event-info">
+                <div class="event-color" [style.background-color]="event.color"></div>
+                <div class="event-details">
+                  <span class="event-title">{{ event.title }}</span>
+                  <span class="event-description" *ngIf="event.description">{{ event.description }}</span>
+                </div>
+              </div>
+            </td>
+            <td>{{ formatDateRange(event.startDate, event.endDate) }}</td>
+            <td>
+              <span class="participants">
+                <i class="fas fa-users"></i>
+                {{ getParticipantCount(event.id) }}/{{ event.maxParticipants }}
+              </span>
+            </td>
+            <td>
+              <span class="status-badge" [class.active]="event.isActive" [class.inactive]="!event.isActive">
+                {{ event.isActive ? 'Activo' : 'Inactivo' }}
+              </span>
+            </td>
+            <td>
+              <div class="action-buttons">
+                <button class="action-btn edit-btn" (click)="onEdit(event)">
+                  <i class="fas fa-edit"></i>
+                </button>
+                <button class="action-btn delete-btn" (click)="onDelete(event.id!)">
+                  <i class="fas fa-trash"></i>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+      
+      <div *ngIf="events.length === 0" class="empty-state">
+        <i class="fas fa-calendar-plus"></i>
+        <h3>No hay eventos programados</h3>
+        <p>Comienza agregando tu primer evento de onboarding.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Modal para agregar/editar evento -->
+<app-modal [isOpen]="isModalOpen" (modalClose)="closeModal()">
+  <app-event-form
+    *ngIf="isModalOpen"
+    [eventToEdit]="eventToEdit"
+    (eventAdded)="onFormSuccess()"
+    (eventUpdated)="onFormSuccess()"
+    (modalClosed)="closeModal()">
+  </app-event-form>
+</app-modal>
