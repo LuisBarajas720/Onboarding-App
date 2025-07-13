@@ -1,92 +1,192 @@
 <div class="modal-content">
-    <header class="modal-header">
-      <h3 class="modal-title">
-        {{ eventToEdit ? 'Editar Evento' : 'Agregar Nuevo Evento' }}
-      </h3>
-    </header>
-  
-    <form [formGroup]="eventForm" (ngSubmit)="onSubmit()" class="modal-form">
-      
-      <!-- Información básica -->
-      <div class="form-section">
-        <h4 class="section-title">Información del Evento</h4>
-        
-        <div class="form-group">
-          <label for="title">Título del Evento</label>
-          <input id="title" type="text" formControlName="title" placeholder="Ej: Journey to Cloud">
-        </div>
+  <header class="modal-header">
+    <h3 class="modal-title">
+      {{ eventToEdit ? 'Editar Evento' : 'Agregar Nuevo Evento' }}
+    </h3>
+  </header>
+
+  <form [formGroup]="eventForm" (ngSubmit)="onSubmit()" class="modal-form">
     
-        <div class="form-group">
-          <label for="description">Descripción</label>
-          <textarea id="description" formControlName="description" placeholder="Descripción del evento (opcional)" rows="3"></textarea>
-        </div>
-      </div>
-
-      <!-- Fechas -->
-      <div class="form-section">
-        <h4 class="section-title">Fechas del Evento</h4>
+    <!-- Información básica -->
+    <div class="form-section">
+      <h4 class="section-title">Información del Evento</h4>
+      
+      <div class="form-group">
+        <label for="title">Título del Evento *</label>
+        <input 
+          id="title" 
+          type="text" 
+          formControlName="title" 
+          placeholder="Ej: Journey to Cloud"
+          [class.error]="title?.invalid && (title?.dirty || title?.touched)"
+          [class.success]="title?.valid && (title?.dirty || title?.touched)">
         
-        <div class="form-row dates-row">
-          <div class="form-group">
-            <label for="startDate">
-              <i class="fas fa-calendar-day"></i>
-              Fecha de Inicio
-            </label>
-            <input id="startDate" type="date" formControlName="startDate">
-          </div>
-          <div class="form-group">
-            <label for="endDate">
-              <i class="fas fa-calendar-check"></i>
-              Fecha de Fin
-            </label>
-            <input id="endDate" type="date" formControlName="endDate">
-          </div>
-        </div>
-      </div>
-
-      <!-- Configuración -->
-      <div class="form-section">
-        <h4 class="section-title">Configuración</h4>
-        
-        <div class="form-row config-row">
-          <div class="form-group">
-            <label for="color">
-              <i class="fas fa-palette"></i>
-              Color del Evento
-            </label>
-            <div class="color-picker">
-              <input id="color" type="color" formControlName="color">
-              <span class="color-preview" [style.background-color]="eventForm.get('color')?.value"></span>
-            </div>
-          </div>
-          <div class="form-group">
-            <label for="maxParticipants">
-              <i class="fas fa-users"></i>
-              Máximo de Participantes
-            </label>
-            <input id="maxParticipants" type="number" formControlName="maxParticipants" min="1" max="100">
-          </div>
-        </div>
-
-        <div class="form-group">
-          <label class="checkbox-label">
-            <input type="checkbox" formControlName="isActive">
-            <span class="checkmark">
-              Evento activo
-            </span>
-          </label>
+        <!-- MENSAJES DE ERROR PARA TÍTULO -->
+        <div class="error-messages" *ngIf="title?.invalid && (title?.dirty || title?.touched)">
+          <small class="error-text" *ngIf="title?.errors?.['required']">
+            El título del evento es obligatorio
+          </small>
+          <small class="error-text" *ngIf="title?.errors?.['minlength']">
+            El título debe tener al menos 3 caracteres
+          </small>
         </div>
       </div>
   
-      <div class="form-actions">
-        <button type="button" class="btn btn-cancel" (click)="onCancel()">
-          <i class="fas fa-times"></i>
-          Cancelar
-        </button>
-        <button type="submit" class="btn btn-primary" [disabled]="eventForm.invalid">
+      <div class="form-group">
+        <label for="description">Descripción</label>
+        <textarea 
+          id="description" 
+          formControlName="description" 
+          placeholder="Descripción del evento (opcional)" 
+          rows="3"
+          [class.success]="description?.valid && description?.value && (description?.dirty || description?.touched)">
+        </textarea>
+      </div>
+    </div>
+
+    <!-- Fechas -->
+    <div class="form-section">
+      <h4 class="section-title">Fechas del Evento</h4>
+      
+      <div class="form-row dates-row">
+        <div class="form-group">
+          <label for="startDate">
+            <i class="fas fa-calendar-day"></i>
+            Fecha de Inicio *
+          </label>
+          <input 
+            id="startDate" 
+            type="date" 
+            formControlName="startDate"
+            [class.error]="startDate?.invalid && (startDate?.dirty || startDate?.touched)"
+            [class.success]="startDate?.valid && (startDate?.dirty || startDate?.touched)">
+          
+          <!-- MENSAJES DE ERROR PARA FECHA INICIO -->
+          <div class="error-messages" *ngIf="startDate?.invalid && (startDate?.dirty || startDate?.touched)">
+            <small class="error-text" *ngIf="startDate?.errors?.['required']">
+              La fecha de inicio es obligatoria
+            </small>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="endDate">
+            <i class="fas fa-calendar-check"></i>
+            Fecha de Fin *
+          </label>
+          <input 
+            id="endDate" 
+            type="date" 
+            formControlName="endDate"
+            [min]="startDate?.value"
+            [class.error]="endDate?.invalid && (endDate?.dirty || endDate?.touched)"
+            [class.success]="endDate?.valid && (endDate?.dirty || endDate?.touched)">
+          
+          <!-- MENSAJES DE ERROR PARA FECHA FIN -->
+          <div class="error-messages" *ngIf="endDate?.invalid && (endDate?.dirty || endDate?.touched)">
+            <small class="error-text" *ngIf="endDate?.errors?.['required']">
+              La fecha de fin es obligatoria
+            </small>
+            <small class="error-text" *ngIf="endDate?.errors?.['invalidDuration']">
+              El evento debe durar entre 5 y 7 días
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <!-- INFO DE DURACIÓN -->
+      <div class="duration-info" *ngIf="startDate?.value && endDate?.value && !endDate?.errors">
+        <small class="info-text">
+          <i class="fas fa-info-circle"></i>
+          Duración: {{ getEventDuration() }} días
+        </small>
+      </div>
+    </div>
+
+    <!-- Configuración -->
+    <div class="form-section">
+      <h4 class="section-title">Configuración</h4>
+      
+      <div class="form-row config-row">
+        <div class="form-group">
+          <label for="color">
+            <i class="fas fa-palette"></i>
+            Color del Evento *
+          </label>
+          <div class="color-picker">
+            <input 
+              id="color" 
+              type="color" 
+              formControlName="color"
+              [class.error]="color?.invalid && (color?.dirty || color?.touched)">
+            <span class="color-preview" [style.background-color]="eventForm.get('color')?.value"></span>
+          </div>
+          
+          <!-- MENSAJES DE ERROR PARA COLOR -->
+          <div class="error-messages" *ngIf="color?.invalid && (color?.dirty || color?.touched)">
+            <small class="error-text" *ngIf="color?.errors?.['required']">
+              Selecciona un color para el evento
+            </small>
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label for="maxParticipants">
+            <i class="fas fa-users"></i>
+            Máximo de Participantes *
+          </label>
+          <input 
+            id="maxParticipants" 
+            type="number" 
+            formControlName="maxParticipants" 
+            min="1" 
+            max="100"
+            [class.error]="maxParticipants?.invalid && (maxParticipants?.dirty || maxParticipants?.touched)"
+            [class.success]="maxParticipants?.valid && (maxParticipants?.dirty || maxParticipants?.touched)">
+          
+          <!-- MENSAJES DE ERROR PARA PARTICIPANTES -->
+          <div class="error-messages" *ngIf="maxParticipants?.invalid && (maxParticipants?.dirty || maxParticipants?.touched)">
+            <small class="error-text" *ngIf="maxParticipants?.errors?.['required']">
+              El número máximo de participantes es obligatorio
+            </small>
+            <small class="error-text" *ngIf="maxParticipants?.errors?.['min']">
+              Debe haber al menos 1 participante
+            </small>
+            <small class="error-text" *ngIf="maxParticipants?.errors?.['max']">
+              El máximo permitido es 100 participantes
+            </small>
+          </div>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="checkbox-label">
+          <input type="checkbox" formControlName="isActive">
+          <span class="checkmark">
+            Evento activo
+          </span>
+        </label>
+      </div>
+    </div>
+
+    <div class="form-actions">
+      <button type="button" class="btn btn-cancel" (click)="onCancel()">
+        <i class="fas fa-times"></i>
+        Cancelar
+      </button>
+      <button 
+        type="submit" 
+        class="btn btn-primary" 
+        [disabled]="eventForm.invalid"
+        [class.loading]="isSubmitting">
+        <span *ngIf="!isSubmitting">
           <i class="fas fa-{{ eventToEdit ? 'edit' : 'plus' }}"></i>
           {{ eventToEdit ? 'Actualizar' : 'Crear' }} Evento
-        </button>
-      </div>
-    </form>
-  </div>
+        </span>
+        <span *ngIf="isSubmitting">
+          {{ eventToEdit ? 'Actualizando...' : 'Creando...' }}
+        </span>
+      </button>
+    </div>
+  </form>
+</div>

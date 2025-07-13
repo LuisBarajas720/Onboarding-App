@@ -162,4 +162,13 @@ public class CollaboratorService {
             collaborator.setAssignedEventId(null);
         }
     }
+    public boolean emailExists(String email, Long excludeId) {
+        if (excludeId != null) {
+            // Para edición: verificar si existe pero excluir el ID actual
+            return collaboratorRepository.existsByEmailAndIdNot(email, excludeId);
+        } else {
+            // Para creación: verificar si existe
+            return collaboratorRepository.existsByEmail(email);
+        }
+    }
 }

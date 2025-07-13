@@ -100,4 +100,8 @@ export class CollaboratorService {
   getAlertStatistics(): Observable<AlertStatistics> {
     return this.http.get<AlertStatistics>(`${this.apiUrl}/alert-statistics`);
   }
+  checkEmailExists(email: string, excludeId?: number): Observable<boolean> {
+    const params = excludeId ? `?excludeId=${excludeId}` : '';
+    return this.http.get<boolean>(`${this.apiUrl}/check-email/${email}${params}`);
+  }
 }

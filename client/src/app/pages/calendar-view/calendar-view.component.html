@@ -1,7 +1,20 @@
+<!-- Header del componente -->
 <app-page-header title="Calendario de Eventos"></app-page-header>
 
-<article class="card">
- <div class="calendar-container">
-   <full-calendar [options]="calendarOptions"></full-calendar>
- </div>
-</article>
+<!-- Contenedor del calendario -->
+<div class="card">
+  <div class="calendar-container">
+    <full-calendar 
+      #calendar
+      [options]="calendarOptions">
+    </full-calendar>
+  </div>
+</div>
+
+<!-- Modal de detalles del evento -->
+<app-event-detail-modal
+  *ngIf="showEventModal && selectedEvent"
+  [event]="selectedEvent"
+  (close)="onCloseEventModal()"
+  (edit)="onEditEvent($event)">
+</app-event-detail-modal>

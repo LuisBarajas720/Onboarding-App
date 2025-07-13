@@ -1,0 +1,100 @@
+<div class="modal-overlay" (click)="onClose()">
+    <div class="modal-content" (click)="$event.stopPropagation()">
+      <!-- Header del modal -->
+      <div class="modal-header">
+        <div class="event-icon" [style.background-color]="event.color">
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+        <div class="header-content">
+          <h2 class="event-title">{{ event.title }}</h2>
+          <span class="event-status" [class.active]="event.isActive" [class.inactive]="!event.isActive">
+            <i class="fas fa-{{ event.isActive ? 'check-circle' : 'pause-circle' }}"></i>
+            {{ event.isActive ? 'Evento Activo' : 'Evento Inactivo' }}
+          </span>
+        </div>
+        <button class="close-btn" (click)="onClose()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+  
+      <!-- Contenido del modal -->
+      <div class="modal-body">
+        <!-- Descripción -->
+        <div class="detail-section" *ngIf="event.description">
+          <h3>Descripción</h3>
+          <p class="description-text">{{ event.description }}</p>
+        </div>
+  
+        <!-- Información de fechas -->
+        <div class="detail-section">
+          <h3>Información de Fechas</h3>
+          <div class="date-info-grid">
+            <div class="date-card">
+              <div class="date-icon start">
+                <i class="fas fa-play"></i>
+              </div>
+              <div class="date-content">
+                <span class="date-label">Fecha de Inicio</span>
+                <span class="date-value">{{ formatDate(event.startDate) }}</span>
+              </div>
+            </div>
+            <div class="date-card">
+              <div class="date-icon end">
+                <i class="fas fa-stop"></i>
+              </div>
+              <div class="date-content">
+                <span class="date-label">Fecha de Fin</span>
+                <span class="date-value">{{ formatDate(event.endDate) }}</span>
+              </div>
+            </div>
+          </div>
+          <div class="duration-badge">
+            <i class="fas fa-clock"></i>
+            Duración: {{ getEventDuration() }} días
+          </div>
+        </div>
+  
+        <!-- Información adicional -->
+        <div class="detail-section">
+          <h3>Detalles Adicionales</h3>
+          <div class="details-grid">
+            <div class="detail-item">
+              <div class="detail-icon">
+                <i class="fas fa-users"></i>
+              </div>
+              <div class="detail-content">
+                <span class="detail-label">Máximo de Participantes</span>
+                <span class="detail-value">{{ event.maxParticipants }} personas</span>
+              </div>
+            </div>
+            <div class="detail-item">
+              <div class="detail-icon">
+                <div class="color-indicator" [style.background-color]="event.color"></div>
+              </div>
+              <div class="detail-content">
+                <span class="detail-label">Color del Evento</span>
+                <span class="detail-value">{{ event.color }}</span>
+              </div>
+            </div>
+            <div class="detail-item" *ngIf="event.id">
+              <div class="detail-icon">
+                <i class="fas fa-hashtag"></i>
+              </div>
+              <div class="detail-content">
+                <span class="detail-label">ID del Evento</span>
+                <span class="detail-value">#{{ event.id }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+  
+      <!-- Footer del modal -->
+      <div class="modal-footer">
+        <button class="btn btn-secondary" (click)="onClose()">
+          <i class="fas fa-times"></i>
+          Cerrar
+        </button>
+      </div>
+    </div>
+  </div>

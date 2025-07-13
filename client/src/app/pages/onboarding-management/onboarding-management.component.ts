@@ -123,23 +123,37 @@ export class OnboardingManagementComponent implements OnInit, OnDestroy {
     this.closeModal();
   }
 
+  /**
+   * Formatea fecha correctamente evitando problemas de zona horaria
+   */
   formatDate(dateString: string): string {
     try {
-      const date = new Date(dateString);
+      // Parsear fecha como local para evitar problemas de zona horaria
+      const [year, month, day] = dateString.split('-').map(Number);
+      const date = new Date(year, month - 1, day);
+      
       return date.toLocaleDateString('es-ES', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric'
       });
     } catch (error) {
+      console.error('Error al formatear fecha:', error);
       return dateString;
     }
   }
 
+  /**
+   * Formatea rango de fechas correctamente evitando problemas de zona horaria
+   */
   formatDateRange(startDate: string, endDate: string): string {
     try {
-      const start = new Date(startDate);
-      const end = new Date(endDate);
+      // Parsear fechas como locales para evitar problemas de zona horaria
+      const [startYear, startMonth, startDay] = startDate.split('-').map(Number);
+      const [endYear, endMonth, endDay] = endDate.split('-').map(Number);
+      
+      const start = new Date(startYear, startMonth - 1, startDay);
+      const end = new Date(endYear, endMonth - 1, endDay);
       
       const startFormatted = start.toLocaleDateString('es-ES', {
         day: '2-digit',
@@ -163,6 +177,7 @@ export class OnboardingManagementComponent implements OnInit, OnDestroy {
       
       return `${startFormatted} - ${endFormatted}`;
     } catch (error) {
+      console.error('Error al formatear rango de fechas:', error);
       return `${startDate} - ${endDate}`;
     }
   }

@@ -1,4 +1,6 @@
-/* Modal */
+/* ========== ESTILOS PARA VALIDACIONES INTEGRADOS ========== */
+
+/* Modal - Manteniendo los estilos existentes */
 .modal-content {
   background: white;
   border-radius: 12px;
@@ -20,7 +22,7 @@
   margin: 0;
 }
 
-/* Form */
+/* Form - Extendiendo los estilos existentes */
 .modal-form {
   padding: 2rem;
 }
@@ -44,7 +46,22 @@
   border: 1px solid #d1d5db;
   border-radius: 8px;
   font-size: 0.875rem;
-  transition: border-color 0.2s;
+  transition: border-color 0.2s, box-shadow 0.2s, background-color 0.2s;
+}
+
+/* Estados de validación para inputs */
+.form-group input.error,
+.form-group select.error {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1);
+}
+
+.form-group input.success,
+.form-group select.success {
+  border-color: #22c55e;
+  background-color: #f0fdf4;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.1);
 }
 
 .form-group input:focus,
@@ -54,11 +71,55 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+.form-group input.error:focus {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2);
+}
+
+.form-group input.success:focus {
+  border-color: #22c55e;
+  box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+}
+
 .form-group input::placeholder {
   color: #9ca3af;
 }
 
-/* Buttons */
+/* Mensajes de error */
+.error-messages {
+  margin-top: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  animation: slideDown 0.3s ease-out;
+}
+
+.error-text {
+  color: #ef4444;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.warning-text {
+  color: #f59e0b;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.info-text {
+  color: #3b82f6;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.form-hint {
+  font-size: 12px;
+  color: #6b7280;
+  margin-top: 5px;
+  display: block;
+}
+
+/* Buttons - Manteniendo estilos existentes con mejoras */
 .form-actions {
   display: flex;
   gap: 1rem;
@@ -75,6 +136,7 @@
   cursor: pointer;
   transition: all 0.2s;
   border: none;
+  position: relative;
 }
 
 .btn-primary {
@@ -82,13 +144,14 @@
   color: white;
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   background: #2563eb;
 }
 
 .btn-primary:disabled {
   background: #9ca3af;
   cursor: not-allowed;
+  opacity: 0.6;
 }
 
 .btn-cancel {
@@ -101,7 +164,45 @@
   background: #e5e7eb;
 }
 
-/* Responsive */
+/* Estado de carga para botones */
+.btn.loading {
+  pointer-events: none;
+  opacity: 0.8;
+}
+
+.btn.loading::after {
+  content: "";
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  margin: auto;
+  border: 2px solid transparent;
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@keyframes slideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Responsive - Manteniendo estilos existentes */
 @media (max-width: 640px) {
   .modal-content {
     margin: 1rem;

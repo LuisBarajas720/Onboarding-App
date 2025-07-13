@@ -6,42 +6,141 @@
   </header>
 
   <form [formGroup]="collaboratorForm" (ngSubmit)="onSubmit()" class="modal-form">
+    <!-- NOMBRE COMPLETO -->
     <div class="form-group">
-      <label for="fullName">Nombre Completo</label>
-      <input id="fullName" type="text" formControlName="fullName" placeholder="Ingresa el nombre completo">
+      <label for="fullName">Nombre Completo *</label>
+      <input 
+        id="fullName" 
+        type="text" 
+        formControlName="fullName" 
+        placeholder="Ingresa el nombre completo"
+        [class.error]="fullName?.invalid && (fullName?.dirty || fullName?.touched)"
+        [class.success]="fullName?.valid && (fullName?.dirty || fullName?.touched)">
+      
+      <!-- MENSAJES DE ERROR PARA NOMBRE -->
+      <div class="error-messages" *ngIf="fullName?.invalid && (fullName?.dirty || fullName?.touched)">
+        <small class="error-text" *ngIf="fullName?.errors?.['required']">
+          El nombre completo es obligatorio
+        </small>
+        <small class="error-text" *ngIf="fullName?.errors?.['minlength']">
+          El nombre debe tener al menos 2 caracteres
+        </small>
+        <small class="error-text" *ngIf="fullName?.errors?.['pattern']">
+          El nombre solo puede contener letras y espacios
+        </small>
+      </div>
     </div>
 
+    <!-- CORREO ELECTRÓNICO -->
     <div class="form-group">
-      <label for="email">Correo Electrónico</label>
-      <input id="email" type="email" formControlName="email" placeholder="colaborador@empresa.com">
+      <label for="email">Correo Electrónico *</label>
+      <input 
+        id="email" 
+        type="email" 
+        formControlName="email" 
+        placeholder="colaborador@empresa.com"
+        [class.error]="email?.invalid && (email?.dirty || email?.touched)"
+        [class.success]="email?.valid && (email?.dirty || email?.touched)">
+      
+      <!-- MENSAJES DE ERROR PARA EMAIL -->
+      <div class="error-messages" *ngIf="email?.invalid && (email?.dirty || email?.touched)">
+        <small class="error-text" *ngIf="email?.errors?.['required']">
+          El correo electrónico es obligatorio
+        </small>
+        <small class="error-text" *ngIf="email?.errors?.['email']">
+          Ingresa un correo electrónico válido
+        </small>
+        <small class="error-text" *ngIf="email?.errors?.['emailExists']">
+          Este correo ya está registrado
+        </small>
+      </div>
     </div>
 
+    <!-- FECHA DE INGRESO -->
     <div class="form-group">
-      <label for="startDate">Fecha de Ingreso</label>
-      <input id="startDate" type="date" formControlName="startDate">
+      <label for="startDate">Fecha de Ingreso *</label>
+      <input 
+        id="startDate" 
+        type="date" 
+        formControlName="startDate"
+        [class.error]="startDate?.invalid && (startDate?.dirty || startDate?.touched)"
+        [class.success]="startDate?.valid && (startDate?.dirty || startDate?.touched)">
+      
+      <!-- MENSAJES DE ERROR PARA FECHA -->
+      <div class="error-messages" *ngIf="startDate?.invalid && (startDate?.dirty || startDate?.touched)">
+        <small class="error-text" *ngIf="startDate?.errors?.['required']">
+          La fecha de ingreso es obligatoria
+        </small>
+        <small class="error-text" *ngIf="startDate?.errors?.['futureDate']">
+          La fecha de ingreso no puede ser muy futura (máximo 1 año)
+        </small>
+      </div>
     </div>
 
+    <!-- EVENTO TÉCNICO ASIGNADO -->
     <div class="form-group">
       <label for="assignedTechOnboardingEvent">Evento Técnico Asignado</label>
-      <select id="assignedTechOnboardingEvent" formControlName="assignedTechOnboardingEvent" class="form-select">
+      <select 
+        id="assignedTechOnboardingEvent" 
+        formControlName="assignedTechOnboardingEvent" 
+        class="form-select"
+        [class.success]="assignedTechOnboardingEvent?.valid && assignedTechOnboardingEvent?.value && eventValidationStatus === 'valid'"
+        [class.error]="assignedTechOnboardingEvent?.invalid && (assignedTechOnboardingEvent?.dirty || assignedTechOnboardingEvent?.touched)"
+        [class.validation-warning]="eventValidationStatus === 'warning'"
+        [class.validation-success]="eventValidationStatus === 'valid'"
+        [class.validation-error]="eventValidationStatus === 'error'">
         <option value="">-- Sin asignar --</option>
         <option 
           *ngFor="let event of onboardingEvents" 
           [value]="event.title"
+          [disabled]="!isEventAvailable(event.title) && (!collaboratorToEdit || collaboratorToEdit.assignedTechOnboardingEvent !== event.title)"
           [style.background-color]="event.color + '20'"
-          [style.border-left]="'4px solid ' + event.color">
+          [style.border-left]="'4px solid ' + event.color"
+          [class.event-full]="!isEventAvailable(event.title)">
           {{ getEventDisplayText(event) }}
+          <span *ngIf="!isEventAvailable(event.title) && (!collaboratorToEdit || collaboratorToEdit.assignedTechOnboardingEvent !== event.title)" class="full-indicator"> - LLENO</span>
         </option>
       </select>
+      
+      <!-- MENSAJES DE ERROR PARA EVENTO -->
+      <div class="error-messages" *ngIf="assignedTechOnboardingEvent?.invalid && (assignedTechOnboardingEvent?.dirty || assignedTechOnboardingEvent?.touched)">
+        <small class="error-text" *ngIf="assignedTechOnboardingEvent?.errors?.['capacityExceeded']">
+          {{ eventValidationMessage }}
+        </small>
+      </div>
+
+      <!-- MENSAJE DE INFORMACIÓN PARA EVENTO -->
+      <div class="validation-info" *ngIf="eventValidationMessage && eventValidationStatus !== 'error'">
+        <small 
+          class="validation-text"
+          [class.warning-text]="eventValidationStatus === 'warning'"
+          [class.success-text]="eventValidationStatus === 'valid'">
+          <i class="fas fa-{{ eventValidationStatus === 'warning' ? 'exclamation-triangle' : 'check-circle' }}"></i>
+          {{ eventValidationMessage }}
+        </small>
+      </div>
+      
       <small class="form-hint">
         Selecciona un evento de onboarding técnico para este colaborador
       </small>
     </div>
 
+
+
+    <!-- BOTONES DE ACCIÓN -->
     <div class="form-actions">
       <button type="button" class="btn btn-cancel" (click)="onCancel()">Cancelar</button>
-      <button type="submit" class="btn btn-primary" [disabled]="collaboratorForm.invalid">
-        {{ collaboratorToEdit ? 'Actualizar' : 'Agregar' }}
+      <button 
+        type="submit" 
+        class="btn btn-primary" 
+        [disabled]="collaboratorForm.invalid"
+        [class.loading]="isSubmitting">
+        <span *ngIf="!isSubmitting">
+          {{ collaboratorToEdit ? 'Actualizar' : 'Agregar' }}
+        </span>
+        <span *ngIf="isSubmitting">
+          {{ collaboratorToEdit ? 'Actualizando...' : 'Agregando...' }}
+        </span>
       </button>
     </div>
   </form>

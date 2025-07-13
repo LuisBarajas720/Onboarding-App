@@ -62,4 +62,12 @@ public class CollaboratorController {
             return ResponseEntity.internalServerError().build();
         }
     }
+    @GetMapping("/check-email/{email}")
+    public ResponseEntity<Boolean> checkEmailExists(
+            @PathVariable String email,
+            @RequestParam(required = false) Long excludeId) {
+
+        boolean exists = collaboratorService.emailExists(email, excludeId);
+        return ResponseEntity.ok(exists);
+    }
 }

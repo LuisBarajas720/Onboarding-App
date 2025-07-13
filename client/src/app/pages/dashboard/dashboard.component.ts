@@ -1,11 +1,12 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, NgClass} from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { HttpClient } from '@angular/common/http';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, takeUntil, forkJoin } from 'rxjs';
 
 import { Collaborator } from '../../models/collaborator.model';
+import { OnboardingEvent } from '../../models/onboarding-event.model';
 import { CollaboratorService } from '../../services/collaborator.service';
+import { OnboardingEventService } from '../../services/onboarding-event.service';
 import { CollaboratorFormComponent } from '../../components/collaborator-form/collaborator-form.component';
 import { ModalComponent } from '../../components/modal/modal.component';
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
@@ -17,13 +18,6 @@ interface Statistics {
   welcomeCompleted: number;
   techCompleted: number;
   pending: number;
-}
-
-interface OnboardingEvent {
-  title: string;
-  start: string;
-  end: string;
-  color?: string;
 }
 
 type SortKey = keyof Collaborator;
@@ -54,6 +48,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private masterCollaborators: Collaborator[] = [];
   public collaborators: Collaborator[] = [];
   private eventColors: { [key: string]: string } = {};
+  private onboardingEvents: OnboardingEvent[] = [];
 
   // ===========================
   // PROPIEDADES DE UI
@@ -77,12 +72,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // ===========================
   constructor(
     private collaboratorService: CollaboratorService,
-    private http: HttpClient
+    private onboardingEventService: OnboardingEventService
   ) {}
 
   ngOnInit(): void {
-    this.loadCollaborators();
-    this.loadEventColors();
+    this.loadInitialData();
   }
 
   ngOnDestroy(): void {
@@ -93,6 +87,34 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // ===========================
   // MÉTODOS DE CARGA DE DATOS
   // ===========================
+
+  /**
+   * Carga colaboradores y eventos simultáneamente
+   */
+  private loadInitialData(): void {
+    forkJoin({
+      collaborators: this.collaboratorService.getCollaborators(),
+      events: this.onboardingEventService.getEvents()
+    })
+    .pipe(takeUntil(this.destroy$))
+    .subscribe({
+      next: ({ collaborators, events }) => {
+        this.masterCollaborators = collaborators;
+        this.onboardingEvents = events;
+        this.buildEventColorsMap();
+        this.applySortersAndFilters();
+      },
+      error: (error) => {
+        console.error('Error al cargar datos iniciales:', error);
+        // Cargar solo colaboradores si falla la carga de eventos
+        this.loadCollaboratorsOnly();
+      }
+    });
+  }
+
+  /**
+   * Carga solo colaboradores (fallback)
+   */
   public loadCollaborators(): void {
     this.collaboratorService.getCollaborators()
       .pipe(takeUntil(this.destroy$))
@@ -107,19 +129,49 @@ export class DashboardComponent implements OnInit, OnDestroy {
       });
   }
 
-  private loadEventColors(): void {
-    this.http.get<OnboardingEvent[]>('/onboardings.json')
+  /**
+   * Carga solo colaboradores sin eventos
+   */
+  private loadCollaboratorsOnly(): void {
+    this.collaboratorService.getCollaborators()
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (data) => {
+          this.masterCollaborators = data;
+          this.applySortersAndFilters();
+        },
+        error: (error) => {
+          console.error('Error al cargar colaboradores:', error);
+        }
+      });
+  }
+
+  /**
+   * Construye el mapa de colores desde los eventos reales
+   */
+  private buildEventColorsMap(): void {
+    this.eventColors = {};
+    this.onboardingEvents.forEach(event => {
+      if (event.title && event.color) {
+        this.eventColors[event.title] = event.color;
+      }
+    });
+  }
+
+  /**
+   * Recarga los datos de eventos para sincronizar colores
+   */
+  public refreshEventColors(): void {
+    this.onboardingEventService.getEvents()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (events) => {
-          events.forEach(event => {
-            if (event.title && event.color) {
-              this.eventColors[event.title] = event.color;
-            }
-          });
+          this.onboardingEvents = events;
+          this.buildEventColorsMap();
+          // No necesitamos aplicar filtros, solo actualizar colores
         },
         error: (error) => {
-          console.error('Error al cargar colores de eventos:', error);
+          console.error('Error al actualizar colores de eventos:', error);
         }
       });
   }
@@ -220,9 +272,30 @@ export class DashboardComponent implements OnInit, OnDestroy {
   // ===========================
   // MÉTODOS DE COLORES DE EVENTOS
   // ===========================
+
+  /**
+   * Obtiene el color del evento desde el mapa construido con datos reales
+   */
   public getEventColor(eventTitle: string | null): string | null {
     if (!eventTitle) return null;
     return this.eventColors[eventTitle] || '#6b7280'; // Color gris por defecto
+  }
+
+  /**
+   * Obtiene información completa del evento
+   */
+  public getEventInfo(eventTitle: string | null): OnboardingEvent | null {
+    if (!eventTitle) return null;
+    return this.onboardingEvents.find(event => event.title === eventTitle) || null;
+  }
+
+  /**
+   * Verifica si un evento existe y está activo
+   */
+  public isEventActive(eventTitle: string | null): boolean {
+    if (!eventTitle) return false;
+    const event = this.getEventInfo(eventTitle);
+    return event ? event.isActive : false;
   }
 
   // ===========================

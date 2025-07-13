@@ -4,8 +4,18 @@ import { RouterLink, RouterLinkActive } from '@angular/router';
 @Component({
   selector: 'app-sidebar',
   standalone: true,
-  imports: [RouterLink, RouterLinkActive], // <-- Añade esto
+  imports: [RouterLink, RouterLinkActive],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.css'
 })
-export class SidebarComponent { }
+export class SidebarComponent {
+  isOpen = false;
+
+  toggleSidebar() {
+    this.isOpen = !this.isOpen;
+  }
+
+  closeSidebar() {
+    this.isOpen = false;
+  }
+}

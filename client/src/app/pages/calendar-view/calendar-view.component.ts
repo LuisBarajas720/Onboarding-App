@@ -10,11 +10,17 @@ import { Subject, takeUntil, map } from 'rxjs';
 import { PageHeaderComponent } from '../../layout/page-header/page-header.component';
 import { OnboardingEventService } from '../../services/onboarding-event.service';
 import { OnboardingEvent } from '../../models/onboarding-event.model';
+import { EventDetailModalComponent } from '../../components/event-detail-modal/event-detail-modal.component';
 
 @Component({
   selector: 'app-calendar-view',
   standalone: true,
-  imports: [CommonModule, FullCalendarModule, PageHeaderComponent],
+  imports: [
+    CommonModule, 
+    FullCalendarModule, 
+    PageHeaderComponent,
+    EventDetailModalComponent
+  ],
   templateUrl: './calendar-view.component.html',
   styleUrls: ['./calendar-view.component.css']
 })
@@ -24,6 +30,8 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   @ViewChild('calendar') calendarComponent!: FullCalendarComponent;
 
   events: OnboardingEvent[] = [];
+  selectedEvent: OnboardingEvent | null = null;
+  showEventModal = false;
   
   calendarOptions: CalendarOptions = {
     plugins: [dayGridPlugin, multiMonthPlugin],
@@ -57,7 +65,8 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
 
     // Evento cuando se hace clic en un evento
     eventClick: (clickInfo) => {
-      this.showEventDetails(clickInfo.event.extendedProps as OnboardingEvent);
+      const eventData = clickInfo.event.extendedProps as OnboardingEvent;
+      this.showEventDetails(eventData);
     }
   };
 
@@ -94,8 +103,8 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     const calendarEvents: EventInput[] = this.events.map(event => ({
       id: event.id?.toString(),
       title: event.title,
-      start: event.startDate,
-      end: event.endDate,
+      start: this.formatDateForCalendar(event.startDate),
+      end: this.formatDateForCalendar(event.endDate, true), // true para fecha de fin
       allDay: true,
       backgroundColor: event.color,
       borderColor: event.color,
@@ -119,6 +128,28 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
     }
   }
 
+  /**
+   * Formatea fecha para FullCalendar evitando problemas de zona horaria
+   */
+  private formatDateForCalendar(dateString: string, isEndDate = false): string {
+    try {
+      const [year, month, day] = dateString.split('-').map(Number);
+      
+      if (isEndDate) {
+        // Para fecha de fin, agregar un día para que FullCalendar muestre correctamente
+        const date = new Date(year, month - 1, day + 1);
+        return date.toISOString().split('T')[0];
+      } else {
+        // Para fecha de inicio, usar tal como está
+        const date = new Date(year, month - 1, day);
+        return date.toISOString().split('T')[0];
+      }
+    } catch (error) {
+      console.error('Error al formatear fecha para calendario:', error);
+      return dateString;
+    }
+  }
+
   private getContrastTextColor(backgroundColor: string): string {
     const color = backgroundColor.replace('#', '');
     const r = parseInt(color.substr(0, 2), 16);
@@ -130,29 +161,25 @@ export class CalendarViewComponent implements OnInit, OnDestroy {
   }
 
   private showEventDetails(event: OnboardingEvent): void {
-    const details = `
-Evento: ${event.title}
-${event.description ? `Descripción: ${event.description}` : ''}
-Fecha inicio: ${this.formatDate(event.startDate)}
-Fecha fin: ${this.formatDate(event.endDate)}
-Máximo participantes: ${event.maxParticipants}
-Estado: ${event.isActive ? 'Activo' : 'Inactivo'}
-    `.trim();
-    
-    alert(details);
+    this.selectedEvent = event;
+    this.showEventModal = true;
   }
 
-  private formatDate(dateString: string): string {
-    try {
-      const date = new Date(dateString);
-      return date.toLocaleDateString('es-ES', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-      });
-    } catch (error) {
-      return dateString;
-    }
+  onCloseEventModal(): void {
+    this.showEventModal = false;
+    this.selectedEvent = null;
+  }
+
+  onEditEvent(event: OnboardingEvent): void {
+    // Cerrar el modal
+    this.onCloseEventModal();
+    
+    // Aquí puedes implementar la lógica para editar el evento
+    // Por ejemplo, navegar a una página de edición o abrir un modal de edición
+    console.log('Editando evento:', event);
+    
+    // Ejemplo: Emitir evento para que el componente padre abra el modal de edición
+    // this.editEvent.emit(event);
   }
 
   refreshEvents(): void {
