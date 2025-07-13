@@ -1,0 +1,155 @@
+<div class="login-container">
+    <!-- Lado izquierdo - Igual que login pero con texto diferente -->
+    <div class="login-info">
+      <div class="info-content">
+        <div class="logo-section">
+          <div class="logo">
+            <i class="fas fa-user-plus"></i>
+          </div>
+          <h1 class="app-title">Únete a nosotros</h1>
+          <p class="app-subtitle">Crea tu cuenta en el sistema</p>
+        </div>
+        
+        <div class="features">
+          <div class="feature">
+            <i class="fas fa-user-shield"></i>
+            <span>Cuenta segura y protegida</span>
+          </div>
+          <div class="feature">
+            <i class="fas fa-rocket"></i>
+            <span>Acceso inmediato al sistema</span>
+          </div>
+          <div class="feature">
+            <i class="fas fa-users"></i>
+            <span>Únete al equipo</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  
+    <!-- Lado derecho - Formulario de registro -->
+    <div class="login-form-section">
+      <div class="form-container">
+        <div class="form-header">
+          <h2>Crear Cuenta</h2>
+          <p>Completa los datos para registrarte</p>
+        </div>
+  
+        <!-- Mensajes de error/éxito -->
+        <div *ngIf="errorMessage" class="error-message">
+          <i class="fas fa-exclamation-circle"></i>
+          {{ errorMessage }}
+        </div>
+  
+        <div *ngIf="successMessage" class="success-message">
+          <i class="fas fa-check-circle"></i>
+          {{ successMessage }}
+        </div>
+  
+        <!-- Formulario -->
+        <form (ngSubmit)="onRegister()" class="login-form">
+          <!-- Campo Username -->
+          <div class="form-group">
+            <label for="username">Usuario</label>
+            <div class="input-wrapper">
+              <i class="fas fa-user"></i>
+              <input
+                type="text"
+                id="username"
+                name="username"
+                [(ngModel)]="registerData.username"
+                (input)="clearMessages()"
+                placeholder="Elige tu nombre de usuario"
+                required
+                [disabled]="isLoading"
+                autocomplete="username"
+              />
+            </div>
+          </div>
+  
+          <!-- Campo Email -->
+          <div class="form-group">
+            <label for="email">Correo Electrónico</label>
+            <div class="input-wrapper">
+              <i class="fas fa-envelope"></i>
+              <input
+                type="email"
+                id="email"
+                name="email"
+                [(ngModel)]="registerData.email"
+                (input)="clearMessages()"
+                (blur)="validateEmail()"
+                placeholder="tu@email.com"
+                required
+                [disabled]="isLoading"
+                autocomplete="email"
+                [class.error]="emailError"
+              />
+            </div>
+            <div *ngIf="emailError" class="field-error">
+              <i class="fas fa-exclamation-triangle"></i>
+              {{ emailError }}
+            </div>
+          </div>
+  
+          <!-- Campo Password -->
+          <div class="form-group">
+            <label for="password">Contraseña</label>
+            <div class="input-wrapper">
+              <i class="fas fa-lock"></i>
+              <input
+                [type]="showPassword ? 'text' : 'password'"
+                id="password"
+                name="password"
+                [(ngModel)]="registerData.password"
+                (input)="clearMessages()"
+                (blur)="validatePassword()"
+                placeholder="Crea una contraseña segura (mín. 6 caracteres)"
+                required
+                [disabled]="isLoading"
+                autocomplete="new-password"
+                [class.error]="passwordError"
+              />
+              <button
+                type="button"
+                class="password-toggle"
+                (click)="togglePassword()"
+                [disabled]="isLoading"
+              >
+                <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+              </button>
+            </div>
+            <div *ngIf="passwordError" class="field-error">
+              <i class="fas fa-exclamation-triangle"></i>
+              {{ passwordError }}
+            </div>
+          </div>
+  
+          <!-- Botón de registro -->
+          <button
+            type="submit"
+            class="login-btn"
+            [disabled]="isLoading || !registerData.username || !registerData.password || !registerData.email"
+          >
+            <span *ngIf="!isLoading">
+              <i class="fas fa-user-plus"></i>
+              Crear Cuenta
+            </span>
+            <span *ngIf="isLoading" class="loading">
+              <i class="fas fa-spinner fa-spin"></i>
+              Creando cuenta...
+            </span>
+          </button>
+        </form>
+  
+        <!-- Footer del formulario -->
+        <div class="form-footer">
+          <p>¿Ya tienes cuenta? 
+            <button type="button" class="link-btn" (click)="goToLogin()">
+              Inicia sesión aquí
+            </button>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>

@@ -67,14 +67,15 @@
 
   <!-- Footer del Sidebar -->
   <div class="sidebar-footer">
-    <div class="user-info">
+    <div class="user-info" (click)="logout()" style="cursor: pointer;" title="Cerrar sesión">
       <div class="user-avatar">
         <i class="fas fa-user"></i>
       </div>
       <div class="user-details">
-        <span class="user-name">Luis Barajas</span>
-        <span class="user-role">Administrador</span>
+        <span class="user-name">{{ currentUser || 'Usuario' }}</span>
+        <span class="user-role">Hacer clic para salir</span>
       </div>
     </div>
   </div>
+
 </nav>

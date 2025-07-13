@@ -1,7 +1,7 @@
-<div class="app-container">
-  <app-sidebar></app-sidebar>
+<!-- Solo mostrar sidebar si el usuario está logueado -->
+<app-sidebar *ngIf="isLoggedIn"></app-sidebar>
 
-  <main class="content-area">
-    <router-outlet></router-outlet>
-  </main>
+<!-- Contenido principal -->
+<div class="main-content" [class.with-sidebar]="isLoggedIn" [class.login-layout]="!isLoggedIn">
+  <router-outlet></router-outlet>
 </div>

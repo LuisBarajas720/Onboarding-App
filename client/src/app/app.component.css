@@ -1,0 +1,38 @@
+/* Contenido principal */
+.main-content {
+    transition: margin-left 0.3s ease-in-out;
+  }
+  
+  /* Cuando hay sidebar (usuario logueado) */
+  .main-content.with-sidebar {
+    margin-left: 280px; /* Ancho del sidebar */
+    min-height: 100vh;
+  }
+  
+  /* Cuando es login (sin sidebar) */
+  .main-content.login-layout {
+    margin-left: 0;
+    width: 100%;
+    min-height: 100vh;
+  }
+  
+  /* Responsive */
+  @media (max-width: 768px) {
+    .main-content.with-sidebar {
+      margin-left: 0; /* En móviles el sidebar es overlay */
+    }
+  }
+  
+  /* Asegurar que el login ocupe toda la pantalla */
+  :host {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+  
+  /* Reset de márgenes globales para el login */
+  .login-layout {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+  }
