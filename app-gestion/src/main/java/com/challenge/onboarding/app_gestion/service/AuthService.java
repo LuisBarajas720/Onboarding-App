@@ -5,6 +5,7 @@ import com.challenge.onboarding.app_gestion.dto.LoginResponse;
 import com.challenge.onboarding.app_gestion.dto.RegisterRequest;
 import com.challenge.onboarding.app_gestion.model.User;
 import com.challenge.onboarding.app_gestion.repository.UserRepository;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.Base64;
@@ -90,5 +91,25 @@ public class AuthService {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    // Método para validar token desde request HTTP
+    public boolean validateTokenFromRequest(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return false;
+        }
+        String token = authHeader.substring(7);
+        return validateToken(token);
+    }
+
+    // Obtener username desde request HTTP
+    public String getUsernameFromRequest(HttpServletRequest request) {
+        String authHeader = request.getHeader("Authorization");
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return null;
+        }
+        String token = authHeader.substring(7);
+        return getUsernameFromToken(token);
     }
 }
