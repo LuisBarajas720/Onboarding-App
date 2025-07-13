@@ -34,3 +34,34 @@
     margin-left: 298px;
     padding: 2.5rem;
   }
+
+  /* Tablets grandes - Ajustar al sidebar de 260px */
+@media (max-width: 1024px) {
+  main.content-area {
+    margin-left: 260px;
+  }
+}
+
+/* Tablets y móviles - Quitar margen cuando sidebar se oculta */
+@media (max-width: 768px) {
+  main.content-area {
+    margin-left: 0 !important;
+    padding-top: 5rem; /* Espacio para el botón de menú móvil */
+  }
+}
+
+/* Móviles pequeños */
+@media (max-width: 640px) {
+  main.content-area {
+    padding: 1rem;
+    padding-top: 4.5rem;
+  }
+}
+
+/* Móviles muy pequeños */
+@media (max-width: 480px) {
+  main.content-area {
+    padding: 0.75rem;
+    padding-top: 4rem;
+  }
+}

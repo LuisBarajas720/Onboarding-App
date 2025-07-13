@@ -80,3 +80,14 @@
     (modalClosed)="closeModal()">
   </app-event-form>
 </app-modal>
+
+<!-- Modal de confirmación de eliminación -->
+<app-modal [isOpen]="showDeleteConfirmModal" (modalClose)="closeDeleteModal()">
+  <app-confirm-dialog
+    *ngIf="showDeleteConfirmModal"
+    title="Confirmar Eliminación"
+    message="¿Estás seguro de que quieres eliminar este evento? Esta acción no se puede deshacer y puede afectar a los colaboradores asignados."
+    (confirm)="handleDeleteConfirm()"
+    (cancel)="closeDeleteModal()">
+  </app-confirm-dialog>
+</app-modal>

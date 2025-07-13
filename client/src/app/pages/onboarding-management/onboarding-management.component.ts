@@ -8,6 +8,7 @@ import { CollaboratorService } from '../../services/collaborator.service';
 import { PageHeaderComponent } from '../../layout/page-header/page-header.component';
 import { ModalComponent } from '../../components/modal/modal.component';
 import { EventFormComponent } from '../../components/event-form/event-form.component';
+import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 
 @Component({
   selector: 'app-onboarding-management',
@@ -16,7 +17,8 @@ import { EventFormComponent } from '../../components/event-form/event-form.compo
     CommonModule,
     PageHeaderComponent,
     ModalComponent,
-    EventFormComponent
+    EventFormComponent,
+    ConfirmDialogComponent
   ],
   templateUrl: './onboarding-management.component.html',
   styleUrls: ['./onboarding-management.component.css']
@@ -28,6 +30,11 @@ export class OnboardingManagementComponent implements OnInit, OnDestroy {
   eventToEdit: OnboardingEvent | null = null;
   isModalOpen = false;
   participantCounts: { [eventId: number]: number } = {};
+
+  // Propiedades para el modal de confirmación de eliminación
+  showDeleteConfirmModal = false;
+  private eventIdToDelete: number | null = null;
+  deleteMessage = '';
 
   constructor(
     private eventService: OnboardingEventService,
@@ -104,18 +111,99 @@ export class OnboardingManagementComponent implements OnInit, OnDestroy {
   }
 
   onDelete(eventId: number): void {
-    if (confirm('¿Estás seguro de que quieres eliminar este evento?')) {
-      this.eventService.deleteEvent(eventId)
+    const participantCount = this.getParticipantCount(eventId);
+    this.eventIdToDelete = eventId;
+    
+    // Personalizar el mensaje según si tiene colaboradores o no
+    if (participantCount > 0) {
+      this.deleteMessage = `¿Estás seguro de que quieres eliminar este evento? 
+      
+      ADVERTENCIA: Este evento tiene ${participantCount} colaborador(es) asignado(s). 
+      Al eliminarlo, estos colaboradores quedarán sin evento técnico asignado.
+      
+      Esta acción no se puede deshacer.`;
+    } else {
+      this.deleteMessage = "¿Estás seguro de que quieres eliminar este evento? Esta acción no se puede deshacer.";
+    }
+    
+    this.showDeleteConfirmModal = true;
+  }
+  
+  closeDeleteModal(): void {
+    this.showDeleteConfirmModal = false;
+    this.eventIdToDelete = null;
+  }
+
+  handleDeleteConfirm(): void {
+    if (this.eventIdToDelete === null) return;
+
+    // Primero obtener el evento para conocer su título
+    const eventToDelete = this.events.find(e => e.id === this.eventIdToDelete);
+    if (!eventToDelete) {
+      this.closeDeleteModal();
+      return;
+    }
+
+    // Verificar si tiene colaboradores asignados
+    const participantCount = this.getParticipantCount(this.eventIdToDelete);
+    
+    if (participantCount > 0) {
+      // Primero desasignar todos los colaboradores de este evento
+      this.collaboratorService.getCollaborators()
         .pipe(takeUntil(this.destroy$))
         .subscribe({
-          next: () => {
-            this.loadEvents();
+          next: (collaborators) => {
+            // Filtrar colaboradores que tienen este evento asignado
+            const affectedCollaborators = collaborators.filter(c => 
+              c.assignedTechOnboardingEvent === eventToDelete.title
+            );
+
+            // Desasignar el evento de todos los colaboradores afectados
+            const updatePromises = affectedCollaborators.map(collaborator => 
+              this.collaboratorService.updateCollaborator(collaborator.id, {
+                ...collaborator,
+                assignedTechOnboardingEvent: '' // Usar cadena vacía en lugar de null
+              }).toPromise()
+            );
+
+            // Esperar a que todas las actualizaciones terminen
+            Promise.all(updatePromises)
+              .then(() => {
+                // Ahora eliminar el evento
+                this.deleteEventAfterCleanup();
+              })
+              .catch((error) => {
+                console.error('Error al desasignar colaboradores:', error);
+                this.closeDeleteModal();
+              });
           },
           error: (error) => {
-            console.error('Error al eliminar evento:', error);
+            console.error('Error al cargar colaboradores:', error);
+            this.closeDeleteModal();
           }
         });
+    } else {
+      // Si no hay colaboradores, eliminar directamente
+      this.deleteEventAfterCleanup();
     }
+  }
+
+  private deleteEventAfterCleanup(): void {
+    if (this.eventIdToDelete === null) return;
+
+    this.eventService.deleteEvent(this.eventIdToDelete)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.loadEvents();
+          this.closeDeleteModal();
+          console.log('Evento eliminado exitosamente');
+        },
+        error: (error) => {
+          console.error('Error al eliminar evento:', error);
+          this.closeDeleteModal();
+        }
+      });
   }
 
   onFormSuccess(): void {

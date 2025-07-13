@@ -11,10 +11,13 @@
   padding: 0;
   flex-shrink: 0;
   position: fixed;
+  top: 0;
+  left: 0;
   border-right: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 4px 0 24px rgba(0, 0, 0, 0.1);
   overflow-y: auto;
   z-index: 1000;
+  transition: transform 0.3s ease-in-out;
 }
 
 /* Botón de menú móvil */
@@ -23,7 +26,7 @@
   position: fixed;
   top: 1rem;
   left: 1rem;
-  z-index: 1001;
+  z-index: 1002;
   background: linear-gradient(135deg, #3b82f6, #2563eb);
   color: white;
   border: none;
@@ -32,6 +35,10 @@
   cursor: pointer;
   transition: all 0.3s ease;
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  width: 48px;
+  height: 48px;
+  justify-content: center;
+  align-items: center;
 }
 
 .mobile-menu-btn:hover {
@@ -39,9 +46,12 @@
   box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
 }
 
-.mobile-menu-btn svg {
-  width: 24px;
-  height: 24px;
+.mobile-menu-btn:active {
+  transform: scale(0.95);
+}
+
+.mobile-menu-btn i {
+  font-size: 20px;
 }
 
 /* Botón de cerrar en mobile */
@@ -55,6 +65,10 @@
   margin-left: auto;
   border-radius: 6px;
   transition: all 0.2s ease;
+  width: 32px;
+  height: 32px;
+  justify-content: center;
+  align-items: center;
 }
 
 .mobile-close-btn:hover {
@@ -62,9 +76,8 @@
   color: #ffffff;
 }
 
-.mobile-close-btn svg {
-  width: 20px;
-  height: 20px;
+.mobile-close-btn i {
+  font-size: 16px;
 }
 
 /* Overlay para mobile */
@@ -73,12 +86,13 @@
   position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   background: rgba(0, 0, 0, 0.5);
   z-index: 999;
   opacity: 0;
   transition: opacity 0.3s ease;
+  backdrop-filter: blur(2px);
 }
 
 .sidebar-overlay.show {
@@ -94,6 +108,7 @@
   padding: 2rem 1.5rem 1.5rem 1.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   margin-bottom: 1rem;
+  flex-shrink: 0;
 }
 
 .logo {
@@ -108,9 +123,8 @@
   flex-shrink: 0;
 }
 
-.logo svg {
-  width: 24px;
-  height: 24px;
+.logo i {
+  font-size: 20px;
 }
 
 .app-title {
@@ -119,12 +133,16 @@
   color: #ffffff;
   margin: 0;
   flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Secciones de Navegación */
 .nav-section {
   margin-bottom: 2rem;
   padding: 0 1.5rem;
+  flex-shrink: 0;
 }
 
 .nav-section-title {
@@ -159,17 +177,22 @@
   font-size: 0.875rem;
   transition: all 0.2s ease-in-out;
   position: relative;
+  min-height: 44px; /* Touch target mínimo */
 }
 
-.nav-link svg {
+.nav-link i {
   width: 20px;
-  height: 20px;
+  font-size: 18px;
   flex-shrink: 0;
   opacity: 0.8;
+  text-align: center;
 }
 
 .nav-link span {
   flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .nav-link:hover {
@@ -178,7 +201,7 @@
   transform: translateX(4px);
 }
 
-.nav-link:hover svg {
+.nav-link:hover i {
   opacity: 1;
   color: #3b82f6;
 }
@@ -189,7 +212,7 @@
   box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
 }
 
-.nav-link.active svg {
+.nav-link.active i {
   opacity: 1;
   color: #ffffff;
 }
@@ -211,6 +234,7 @@
   margin-top: auto;
   padding: 1.5rem;
   border-top: 1px solid rgba(255, 255, 255, 0.1);
+  flex-shrink: 0;
 }
 
 .user-info {
@@ -221,6 +245,7 @@
   background: rgba(255, 255, 255, 0.05);
   border-radius: 8px;
   transition: all 0.2s ease-in-out;
+  min-height: 44px; /* Touch target mínimo */
 }
 
 .user-info:hover {
@@ -239,9 +264,8 @@
   flex-shrink: 0;
 }
 
-.user-avatar svg {
-  width: 20px;
-  height: 20px;
+.user-avatar i {
+  font-size: 16px;
 }
 
 .user-details {
@@ -249,6 +273,7 @@
   flex-direction: column;
   gap: 0.125rem;
   min-width: 0;
+  flex: 1;
 }
 
 .user-name {
@@ -256,12 +281,18 @@
   color: #ffffff;
   font-size: 0.875rem;
   line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .user-role {
   font-size: 0.75rem;
   color: #94a3b8;
   line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* Scrollbar personalizado */
@@ -282,9 +313,11 @@
   background: rgba(255, 255, 255, 0.3);
 }
 
-/* Responsive Design */
+/* ===========================
+   RESPONSIVE DESIGN
+   =========================== */
 
-/* Tablets y pantallas medianas */
+/* Tablets grandes */
 @media (max-width: 1024px) {
   .sidebar-nav {
     width: 260px;
@@ -311,16 +344,15 @@
   }
 }
 
-/* Móviles */
+/* Tablets */
 @media (max-width: 768px) {
   .mobile-menu-btn {
-    display: block;
+    display: flex;
   }
   
   .sidebar-nav {
-    width: 100%;
+    width: 280px;
     transform: translateX(-100%);
-    transition: transform 0.3s ease-in-out;
   }
   
   .sidebar-nav.open {
@@ -328,7 +360,7 @@
   }
   
   .mobile-close-btn {
-    display: block;
+    display: flex;
   }
   
   .sidebar-header {
@@ -344,10 +376,21 @@
   }
 }
 
-/* Móviles pequeños */
-@media (max-width: 480px) {
+/* Móviles */
+@media (max-width: 640px) {
+  .mobile-menu-btn {
+    width: 44px;
+    height: 44px;
+    padding: 0.625rem;
+  }
+  
+  .mobile-menu-btn i {
+    font-size: 18px;
+  }
+  
   .sidebar-nav {
-    width: 100%;
+    width: 100vw;
+    max-width: 320px;
   }
   
   .sidebar-header {
@@ -365,15 +408,11 @@
   
   .nav-link {
     padding: 0.75rem 1rem;
-  }
-  
-  .nav-link svg {
-    width: 18px;
-    height: 18px;
-  }
-  
-  .nav-link span {
     font-size: 0.875rem;
+  }
+  
+  .nav-link i {
+    font-size: 16px;
   }
   
   .app-title {
@@ -389,15 +428,22 @@
   }
 }
 
-/* Pantallas muy pequeñas */
-@media (max-width: 320px) {
+/* Móviles pequeños */
+@media (max-width: 480px) {
   .mobile-menu-btn {
+    top: 0.75rem;
+    left: 0.75rem;
+    width: 40px;
+    height: 40px;
     padding: 0.5rem;
   }
   
-  .mobile-menu-btn svg {
-    width: 20px;
-    height: 20px;
+  .mobile-menu-btn i {
+    font-size: 16px;
+  }
+  
+  .sidebar-nav {
+    max-width: 280px;
   }
   
   .sidebar-header {
@@ -417,12 +463,107 @@
     height: 36px;
   }
   
-  .logo svg {
-    width: 20px;
-    height: 20px;
+  .logo i {
+    font-size: 16px;
   }
   
   .app-title {
     font-size: 1rem;
+  }
+  
+  .nav-link {
+    padding: 0.625rem 0.75rem;
+  }
+  
+  .nav-link i {
+    font-size: 14px;
+  }
+  
+  .user-avatar {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .user-avatar i {
+    font-size: 14px;
+  }
+}
+
+/* Pantallas muy pequeñas */
+@media (max-width: 320px) {
+  .mobile-menu-btn {
+    top: 0.5rem;
+    left: 0.5rem;
+    width: 36px;
+    height: 36px;
+    padding: 0.375rem;
+  }
+  
+  .mobile-menu-btn i {
+    font-size: 14px;
+  }
+  
+  .sidebar-nav {
+    width: 100vw;
+    max-width: 100%;
+  }
+  
+  .sidebar-header {
+    padding: 0.5rem;
+  }
+  
+  .nav-section {
+    padding: 0 0.5rem;
+  }
+  
+  .sidebar-footer {
+    padding: 0.5rem;
+  }
+  
+  .logo {
+    width: 32px;
+    height: 32px;
+  }
+  
+  .logo i {
+    font-size: 14px;
+  }
+  
+  .app-title {
+    font-size: 0.9rem;
+  }
+  
+  .nav-link {
+    padding: 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .nav-link i {
+    font-size: 12px;
+  }
+  
+  .user-name {
+    font-size: 0.75rem;
+  }
+  
+  .user-role {
+    font-size: 0.65rem;
+  }
+}
+
+/* Mejoras de accesibilidad */
+@media (prefers-reduced-motion: reduce) {
+  .sidebar-nav,
+  .sidebar-overlay,
+  .mobile-menu-btn,
+  .nav-link {
+    transition: none;
+  }
+}
+
+/* Soporte para pantallas de alta densidad */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+  .sidebar-nav {
+    box-shadow: 2px 0 12px rgba(0, 0, 0, 0.15);
   }
 }
