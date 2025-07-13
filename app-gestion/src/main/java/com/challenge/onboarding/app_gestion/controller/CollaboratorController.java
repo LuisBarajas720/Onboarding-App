@@ -1,5 +1,8 @@
 package com.challenge.onboarding.app_gestion.controller;
 
+import com.challenge.onboarding.app_gestion.dto.CollaboratorCreateDTO;
+import com.challenge.onboarding.app_gestion.dto.CollaboratorResponseDTO;
+import com.challenge.onboarding.app_gestion.dto.CollaboratorUpdateDTO;
 import com.challenge.onboarding.app_gestion.model.Collaborator;
 import com.challenge.onboarding.app_gestion.model.UpdateStatusRequest;
 import com.challenge.onboarding.app_gestion.service.CollaboratorService;
@@ -44,7 +47,7 @@ public class CollaboratorController {
                     description = "Lista de colaboradores obtenida exitosamente",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = Collaborator.class, type = "array")
+                            schema = @Schema(implementation = CollaboratorResponseDTO.class, type = "array")
                     )
             ),
             @ApiResponse(
@@ -65,7 +68,8 @@ public class CollaboratorController {
 
         try {
             List<Collaborator> collaborators = collaboratorService.getAllCollaborators();
-            return ResponseEntity.ok(collaborators);
+            List<CollaboratorResponseDTO> responseDTOs = collaboratorService.toResponseDTOList(collaborators);
+            return ResponseEntity.ok(responseDTOs);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error al obtener colaboradores");
         }
@@ -81,7 +85,7 @@ public class CollaboratorController {
                     description = "Colaborador creado exitosamente",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = Collaborator.class)
+                            schema = @Schema(implementation = CollaboratorResponseDTO.class)
                     )
             ),
             @ApiResponse(
@@ -100,28 +104,29 @@ public class CollaboratorController {
                     description = "Datos del colaborador a crear",
                     required = true,
                     content = @Content(
-                            schema = @Schema(implementation = Collaborator.class),
+                            schema = @Schema(implementation = CollaboratorCreateDTO.class),
                             examples = @ExampleObject(
                                     value = """
                     {
-                        "name": "Juan Pérez",
+                        "fullName": "Juan Pérez",
                         "email": "juan.perez@empresa.com",
-                        "position": "Desarrollador Senior",
-                        "department": "Tecnología",
-                        "startDate": "2024-01-15"
+                        "startDate": "2024-01-15",
+                        "assignedTechOnboardingEvent": "Journey to Cloud"
                     }
                     """
                             )
                     )
             )
-            @RequestBody Collaborator collaborator, HttpServletRequest request) {
+            @RequestBody CollaboratorCreateDTO collaboratorDTO, HttpServletRequest request) {
         if (!securityHelper.isValidRequest(request)) {
             return securityHelper.unauthorizedResponse();
         }
 
         try {
+            Collaborator collaborator = collaboratorService.fromCreateDTO(collaboratorDTO);
             Collaborator savedCollaborator = collaboratorService.createCollaborator(collaborator);
-            return ResponseEntity.ok(savedCollaborator);
+            CollaboratorResponseDTO responseDTO = collaboratorService.toResponseDTO(savedCollaborator);
+            return ResponseEntity.ok(responseDTO);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error al crear colaborador");
         }
@@ -137,7 +142,7 @@ public class CollaboratorController {
                     description = "Colaborador actualizado exitosamente",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = Collaborator.class)
+                            schema = @Schema(implementation = CollaboratorResponseDTO.class)
                     )
             ),
             @ApiResponse(
@@ -157,16 +162,19 @@ public class CollaboratorController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     description = "Datos actualizados del colaborador",
                     required = true,
-                    content = @Content(schema = @Schema(implementation = Collaborator.class))
+                    content = @Content(schema = @Schema(implementation = CollaboratorUpdateDTO.class))
             )
-            @RequestBody Collaborator collaboratorDetails, HttpServletRequest request) {
+            @RequestBody CollaboratorUpdateDTO collaboratorDTO, HttpServletRequest request) {
         if (!securityHelper.isValidRequest(request)) {
             return securityHelper.unauthorizedResponse();
         }
 
         try {
-            Collaborator updatedCollaborator = collaboratorService.updateCollaborator(id, collaboratorDetails);
-            return ResponseEntity.ok(updatedCollaborator);
+            Collaborator collaborator = collaboratorService.getCollaboratorById(id);
+            collaboratorService.updateFromDTO(collaborator, collaboratorDTO);
+            Collaborator updatedCollaborator = collaboratorService.updateCollaboratorEntity(id, collaborator);
+            CollaboratorResponseDTO responseDTO = collaboratorService.toResponseDTO(updatedCollaborator);
+            return ResponseEntity.ok(responseDTO);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error al actualizar colaborador");
         }
@@ -218,7 +226,7 @@ public class CollaboratorController {
                     description = "Estado de onboarding actualizado exitosamente",
                     content = @Content(
                             mediaType = "application/json",
-                            schema = @Schema(implementation = Collaborator.class)
+                            schema = @Schema(implementation = CollaboratorResponseDTO.class)
                     )
             ),
             @ApiResponse(
@@ -243,7 +251,7 @@ public class CollaboratorController {
                             examples = @ExampleObject(
                                     value = """
                     {
-                        "onboardingType": "TECHNICAL",
+                        "onboardingType": "tech",
                         "status": true
                     }
                     """
@@ -257,7 +265,8 @@ public class CollaboratorController {
 
         try {
             Collaborator updatedCollaborator = collaboratorService.updateOnboardingStatus(id, request.getOnboardingType(), request.isStatus());
-            return ResponseEntity.ok(updatedCollaborator);
+            CollaboratorResponseDTO responseDTO = collaboratorService.toResponseDTO(updatedCollaborator);
+            return ResponseEntity.ok(responseDTO);
         } catch (Exception e) {
             return ResponseEntity.badRequest().body("Error al actualizar estado");
         }

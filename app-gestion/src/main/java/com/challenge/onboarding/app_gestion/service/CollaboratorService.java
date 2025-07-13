@@ -1,5 +1,8 @@
 package com.challenge.onboarding.app_gestion.service;
 
+import com.challenge.onboarding.app_gestion.dto.CollaboratorCreateDTO;
+import com.challenge.onboarding.app_gestion.dto.CollaboratorResponseDTO;
+import com.challenge.onboarding.app_gestion.dto.CollaboratorUpdateDTO;
 import com.challenge.onboarding.app_gestion.model.Collaborator;
 import com.challenge.onboarding.app_gestion.model.OnboardingEvent;
 import com.challenge.onboarding.app_gestion.repository.CollaboratorRepository;
@@ -13,7 +16,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
+import java.util.stream.Collectors;
+import com.challenge.onboarding.app_gestion.service.strategy.AlertContext;
 @Service
 public class CollaboratorService {
 
@@ -22,6 +26,9 @@ public class CollaboratorService {
 
     @Autowired
     private OnboardingEventRepository eventRepository;
+
+    @Autowired
+    private AlertContext alertContext;
 
     public List<Collaborator> getAllCollaborators() {
         return collaboratorRepository.findAll();
@@ -77,70 +84,15 @@ public class CollaboratorService {
     // ===========================
 
     /**
-     * Verifica y envía alertas para eventos próximos (7 días o menos)
-     * Simula el envío de correos y retorna la información para mostrar en frontend
+     * Verifica y envía alertas usando el patrón Strategy
+     * Ahora delegamos la lógica a estrategias específicas
      */
     public Map<String, Object> checkAndSendAlerts() {
-        LocalDate today = LocalDate.now();
         List<Collaborator> collaborators = collaboratorRepository.findAll();
         List<OnboardingEvent> activeEvents = eventRepository.findByIsActiveTrue();
 
-        List<Map<String, Object>> alertsSent = new ArrayList<>();
-
-        System.out.println("=== SISTEMA DE ALERTAS DE ONBOARDING ===");
-        System.out.println("Fecha de verificación: " + today);
-
-        for (Collaborator collaborator : collaborators) {
-            // Solo colaboradores con evento asignado y onboarding técnico pendiente
-            if (collaborator.getAssignedTechOnboardingEvent() != null &&
-                    !collaborator.isTechOnboardingStatus()) {
-
-                // Buscar el evento correspondiente
-                OnboardingEvent assignedEvent = activeEvents.stream()
-                        .filter(event -> event.getTitle().equals(collaborator.getAssignedTechOnboardingEvent()))
-                        .findFirst()
-                        .orElse(null);
-
-                if (assignedEvent != null) {
-                    long daysUntilEvent = ChronoUnit.DAYS.between(today, assignedEvent.getStartDate());
-
-                    // Enviar alerta si el evento es en 7 días o menos
-                    if (daysUntilEvent <= 7 && daysUntilEvent >= 0) {
-
-                        // SIMULACIÓN EN CONSOLA
-                        System.out.println("📧 ALERTA ENVIADA:");
-                        System.out.println("   Para: " + collaborator.getEmail());
-                        System.out.println("   Colaborador: " + collaborator.getFullName());
-                        System.out.println("   Evento: " + assignedEvent.getTitle());
-                        System.out.println("   Fecha evento: " + assignedEvent.getStartDate());
-                        System.out.println("   Días restantes: " + daysUntilEvent);
-                        System.out.println("   Mensaje: Su onboarding técnico está próximo");
-                        System.out.println("   ---");
-
-                        // Información para el frontend
-                        Map<String, Object> alertInfo = new HashMap<>();
-                        alertInfo.put("collaboratorName", collaborator.getFullName());
-                        alertInfo.put("email", collaborator.getEmail());
-                        alertInfo.put("eventTitle", assignedEvent.getTitle());
-                        alertInfo.put("eventDate", assignedEvent.getStartDate().toString());
-                        alertInfo.put("daysUntil", daysUntilEvent);
-
-                        alertsSent.add(alertInfo);
-                    }
-                }
-            }
-        }
-
-        System.out.println("Total de alertas enviadas: " + alertsSent.size());
-        System.out.println("=====================================");
-
-        // Respuesta para el frontend
-        Map<String, Object> response = new HashMap<>();
-        response.put("checkDate", today.toString());
-        response.put("totalAlerts", alertsSent.size());
-        response.put("alerts", alertsSent);
-
-        return response;
+        // Usar el contexto de estrategias para procesar todas las alertas
+        return alertContext.executeAllAlertStrategies(collaborators, activeEvents);
     }
 
     // MÉTODO EXISTENTE: Conecta el título del evento con su ID
@@ -170,5 +122,71 @@ public class CollaboratorService {
             // Para creación: verificar si existe
             return collaboratorRepository.existsByEmail(email);
         }
+    }
+    /**
+     * Convierte Collaborator entity a CollaboratorResponseDTO
+     */
+    public CollaboratorResponseDTO toResponseDTO(Collaborator collaborator) {
+        CollaboratorResponseDTO dto = new CollaboratorResponseDTO();
+        dto.setId(collaborator.getId());
+        dto.setFullName(collaborator.getFullName());
+        dto.setEmail(collaborator.getEmail());
+        dto.setStartDate(collaborator.getStartDate());
+        dto.setWelcomeOnboardingStatus(collaborator.isWelcomeOnboardingStatus());
+        dto.setTechOnboardingStatus(collaborator.isTechOnboardingStatus());
+        dto.setAssignedTechOnboardingEvent(collaborator.getAssignedTechOnboardingEvent());
+        return dto;
+    }
+
+    /**
+     * Convierte lista de Collaborator entities a lista de DTOs
+     */
+    public List<CollaboratorResponseDTO> toResponseDTOList(List<Collaborator> collaborators) {
+        return collaborators.stream()
+                .map(this::toResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Convierte CollaboratorCreateDTO a Collaborator entity
+     */
+    public Collaborator fromCreateDTO(CollaboratorCreateDTO dto) {
+        Collaborator collaborator = new Collaborator();
+        collaborator.setFullName(dto.getFullName());
+        collaborator.setEmail(dto.getEmail());
+        collaborator.setStartDate(dto.getStartDate());
+        collaborator.setAssignedTechOnboardingEvent(dto.getAssignedTechOnboardingEvent());
+        // Los status se inicializan como false por defecto
+        collaborator.setWelcomeOnboardingStatus(false);
+        collaborator.setTechOnboardingStatus(false);
+        return collaborator;
+    }
+
+    /**
+     * Actualiza Collaborator entity desde CollaboratorUpdateDTO
+     */
+    public void updateFromDTO(Collaborator collaborator, CollaboratorUpdateDTO dto) {
+        collaborator.setFullName(dto.getFullName());
+        collaborator.setEmail(dto.getEmail());
+        collaborator.setStartDate(dto.getStartDate());
+        collaborator.setWelcomeOnboardingStatus(dto.isWelcomeOnboardingStatus());
+        collaborator.setTechOnboardingStatus(dto.isTechOnboardingStatus());
+        collaborator.setAssignedTechOnboardingEvent(dto.getAssignedTechOnboardingEvent());
+    }
+    /**
+     * Obtiene un colaborador por ID (para uso interno)
+    */
+    public Collaborator getCollaboratorById(Long id) {
+        return collaboratorRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Colaborador no encontrado con id: " + id));
+    }
+
+    /**
+     * Actualiza la entidad colaborador (renombrado para evitar conflictos)
+     */
+    public Collaborator updateCollaboratorEntity(Long id, Collaborator collaborator) {
+        // Buscar y asignar el ID del evento si se proporciona un título
+        setEventIdFromTitle(collaborator);
+        return collaboratorRepository.save(collaborator);
     }
 }

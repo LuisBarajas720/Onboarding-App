@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { Collaborator } from '../models/collaborator.model';
+import { environment } from '../../environments/environment';
 
 // Interfaces para el sistema de alertas
 export interface AlertStatistics {
@@ -31,9 +32,7 @@ export interface AlertInfo {
   providedIn: 'root'
 })
 export class CollaboratorService {
-
-  private apiUrl = 'http://localhost:8080/api/v1/collaborators';
-
+  private apiUrl = `${environment.apiUrl}api/v1/collaborators`;
   constructor(private http: HttpClient) { }
 
   // ===========================

@@ -2,13 +2,13 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { OnboardingEvent } from '../models/onboarding-event.model';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class OnboardingEventService {
-  private apiUrl = 'http://localhost:8080/api/v1/onboarding-events';
-
+  private apiUrl = `${environment.apiUrl}api/v1/onboarding-events`;
   constructor(private http: HttpClient) {}
 
   getEvents(): Observable<OnboardingEvent[]> {

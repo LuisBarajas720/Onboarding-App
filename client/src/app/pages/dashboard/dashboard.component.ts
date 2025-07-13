@@ -1,24 +1,23 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { CommonModule, NgClass} from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { Subject, takeUntil, forkJoin } from 'rxjs';
+import { Subject, takeUntil, combineLatest } from 'rxjs';
 
 import { Collaborator } from '../../models/collaborator.model';
 import { OnboardingEvent } from '../../models/onboarding-event.model';
-import { CollaboratorService } from '../../services/collaborator.service';
-import { OnboardingEventService } from '../../services/onboarding-event.service';
 import { CollaboratorFormComponent } from '../../components/collaborator-form/collaborator-form.component';
 import { ModalComponent } from '../../components/modal/modal.component';
 import { ConfirmDialogComponent } from '../../components/confirm-dialog/confirm-dialog.component';
 import { PageHeaderComponent } from '../../layout/page-header/page-header.component';
 
-// Interfaces para mejor tipado
-interface Statistics {
-  total: number;
-  welcomeCompleted: number;
-  techCompleted: number;
-  pending: number;
-}
+// Importar el Facade
+import { 
+  DashboardFacadeService, 
+  DashboardData, 
+  FilterOptions, 
+  SortOptions, 
+  Statistics 
+} from '../../services/facade/dashboard-facade.service';
 
 type SortKey = keyof Collaborator;
 type SortDirection = 'asc' | 'desc';
@@ -41,42 +40,42 @@ type OnboardingType = 'welcome' | 'tech';
   styleUrls: ['./dashboard.component.css']
 })
 export class DashboardComponent implements OnInit, OnDestroy {
+  
   // ===========================
-  // PROPIEDADES DE DATOS
+  // PROPIEDADES SIMPLIFICADAS CON FACADE
   // ===========================
   private readonly destroy$ = new Subject<void>();
-  private masterCollaborators: Collaborator[] = [];
+  
+  // Datos del dashboard
+  public dashboardData: DashboardData | null = null;
   public collaborators: Collaborator[] = [];
-  private eventColors: { [key: string]: string } = {};
-  private onboardingEvents: OnboardingEvent[] = [];
-
-  // ===========================
-  // PROPIEDADES DE UI
-  // ===========================
+  public statistics: Statistics = { total: 0, welcomeCompleted: 0, techCompleted: 0, pending: 0 };
+  
+  // Estado de UI
   public collaboratorToEdit: Collaborator | null = null;
   public isModalOpen = false;
   public showDeleteConfirmModal = false;
   private collaboratorIdToDelete: number | null = null;
+  
+  // Filtros y ordenamiento (ahora manejados por el facade)
+  public currentFilters: FilterOptions = {
+    welcomeFilter: 'all',
+    techFilter: 'all',
+    searchTerm: ''
+  };
+  
+  public currentSort: SortOptions = {
+    sortKey: 'fullName',
+    sortDirection: 'asc'
+  };
 
   // ===========================
-  // PROPIEDADES DE FILTROS Y ORDENAMIENTO
+  // CONSTRUCTOR SIMPLIFICADO
   // ===========================
-  public welcomeFilter: FilterStatus = 'all';
-  public techFilter: FilterStatus = 'all';
-  public searchTerm = '';
-  public sortKey: SortKey = 'fullName';
-  public sortDirection: SortDirection = 'asc';
-
-  // ===========================
-  // CONSTRUCTOR E INICIALIZACIÓN
-  // ===========================
-  constructor(
-    private collaboratorService: CollaboratorService,
-    private onboardingEventService: OnboardingEventService
-  ) {}
+  constructor(private dashboardFacade: DashboardFacadeService) {}
 
   ngOnInit(): void {
-    this.loadInitialData();
+    this.initializeDashboard();
   }
 
   ngOnDestroy(): void {
@@ -85,241 +84,151 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   // ===========================
-  // MÉTODOS DE CARGA DE DATOS
+  // INICIALIZACIÓN SIMPLIFICADA
   // ===========================
-
+  
   /**
-   * Carga colaboradores y eventos simultáneamente
+   * Inicializa el dashboard usando el facade
    */
-  private loadInitialData(): void {
-    forkJoin({
-      collaborators: this.collaboratorService.getCollaborators(),
-      events: this.onboardingEventService.getEvents()
-    })
+  private initializeDashboard(): void {
+    // Combinar datos del dashboard con filtros y ordenamiento
+    combineLatest([
+      this.dashboardFacade.loadDashboardData(),
+      this.dashboardFacade.filters$,
+      this.dashboardFacade.sort$
+    ])
     .pipe(takeUntil(this.destroy$))
     .subscribe({
-      next: ({ collaborators, events }) => {
-        this.masterCollaborators = collaborators;
-        this.onboardingEvents = events;
-        this.buildEventColorsMap();
-        this.applySortersAndFilters();
+      next: ([dashboardData, filters, sort]) => {
+        this.dashboardData = dashboardData;
+        this.currentFilters = filters;
+        this.currentSort = sort;
+        this.updateDisplayData();
       },
       error: (error) => {
-        console.error('Error al cargar datos iniciales:', error);
-        // Cargar solo colaboradores si falla la carga de eventos
-        this.loadCollaboratorsOnly();
+        console.error('Error al cargar datos del dashboard:', error);
       }
     });
   }
 
   /**
-   * Carga solo colaboradores (fallback)
+   * Recarga los datos del dashboard
    */
   public loadCollaborators(): void {
-    this.collaboratorService.getCollaborators()
+    this.dashboardFacade.loadDashboardData()
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
-          this.masterCollaborators = data;
-          this.applySortersAndFilters();
+          this.dashboardData = data;
+          this.updateDisplayData();
         },
         error: (error) => {
-          console.error('Error al cargar colaboradores:', error);
+          console.error('Error al recargar colaboradores:', error);
         }
       });
   }
 
   /**
-   * Carga solo colaboradores sin eventos
+   * Actualiza los datos mostrados aplicando filtros y ordenamiento
    */
-  private loadCollaboratorsOnly(): void {
-    this.collaboratorService.getCollaborators()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (data) => {
-          this.masterCollaborators = data;
-          this.applySortersAndFilters();
-        },
-        error: (error) => {
-          console.error('Error al cargar colaboradores:', error);
-        }
-      });
-  }
-
-  /**
-   * Construye el mapa de colores desde los eventos reales
-   */
-  private buildEventColorsMap(): void {
-    this.eventColors = {};
-    this.onboardingEvents.forEach(event => {
-      if (event.title && event.color) {
-        this.eventColors[event.title] = event.color;
-      }
-    });
-  }
-
-  /**
-   * Recarga los datos de eventos para sincronizar colores
-   */
-  public refreshEventColors(): void {
-    this.onboardingEventService.getEvents()
-      .pipe(takeUntil(this.destroy$))
-      .subscribe({
-        next: (events) => {
-          this.onboardingEvents = events;
-          this.buildEventColorsMap();
-          // No necesitamos aplicar filtros, solo actualizar colores
-        },
-        error: (error) => {
-          console.error('Error al actualizar colores de eventos:', error);
-        }
-      });
-  }
-
-  // ===========================
-  // MÉTODOS DE FILTRADO Y ORDENAMIENTO
-  // ===========================
-  public applySortersAndFilters(): void {
-    let processedList = [...this.masterCollaborators];
-
-    // Aplicar filtros
-    processedList = this.applyFilters(processedList);
+  private updateDisplayData(): void {
+    if (!this.dashboardData) return;
     
-    // Aplicar ordenamiento
-    processedList = this.applySorting(processedList);
-
-    this.collaborators = processedList;
+    // Usar el facade para filtrar y ordenar
+    this.collaborators = this.dashboardFacade.getFilteredAndSortedCollaborators(
+      this.dashboardData.collaborators,
+      this.currentFilters,
+      this.currentSort
+    );
+    
+    // Calcular estadísticas
+    this.statistics = this.dashboardFacade.calculateStatistics(this.dashboardData.collaborators);
   }
 
-  private applyFilters(list: Collaborator[]): Collaborator[] {
-    return list.filter(collaborator => {
-      // Filtro de búsqueda
-      if (this.searchTerm) {
-        const searchLower = this.searchTerm.toLowerCase();
-        const matchesSearch = 
-          collaborator.fullName.toLowerCase().includes(searchLower) ||
-          collaborator.email.toLowerCase().includes(searchLower);
-        if (!matchesSearch) return false;
-      }
-
-      // Filtro de onboarding de bienvenida
-      if (this.welcomeFilter !== 'all') {
-        const isCompleted = this.welcomeFilter === 'completed';
-        if (collaborator.welcomeOnboardingStatus !== isCompleted) return false;
-      }
-
-      // Filtro de onboarding técnico
-      if (this.techFilter !== 'all') {
-        const isCompleted = this.techFilter === 'completed';
-        if (collaborator.techOnboardingStatus !== isCompleted) return false;
-      }
-
-      return true;
-    });
-  }
-
-  private applySorting(list: Collaborator[]): Collaborator[] {
-    return list.sort((a, b) => {
-      let valueA = a[this.sortKey] ?? '';
-      let valueB = b[this.sortKey] ?? '';
-
-      // Conversión a string para comparación uniforme
-      if (typeof valueA === 'string' && typeof valueB === 'string') {
-        valueA = valueA.toLowerCase();
-        valueB = valueB.toLowerCase();
-      }
-
-      // Comparación
-      let comparison = 0;
-      if (valueA > valueB) {
-        comparison = 1;
-      } else if (valueA < valueB) {
-        comparison = -1;
-      }
-
-      return this.sortDirection === 'asc' ? comparison : -comparison;
-    });
+  // ===========================
+  // MÉTODOS DE FILTRADO Y ORDENAMIENTO SIMPLIFICADOS
+  // ===========================
+  
+  public applySortersAndFilters(): void {
+    this.updateDisplayData();
   }
 
   public setSort(key: SortKey): void {
-    if (this.sortKey === key) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.sortKey = key;
-      this.sortDirection = 'asc';
-    }
-    this.applySortersAndFilters();
+    const newDirection: SortDirection = 
+      this.currentSort.sortKey === key && this.currentSort.sortDirection === 'asc' 
+        ? 'desc' 
+        : 'asc';
+    
+    this.dashboardFacade.updateSort({ sortKey: key, sortDirection: newDirection });
   }
 
   public toggleSortDirection(): void {
-    this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
-    this.applySortersAndFilters();
+    const newDirection: SortDirection = this.currentSort.sortDirection === 'asc' ? 'desc' : 'asc';
+    this.dashboardFacade.updateSort({ sortDirection: newDirection });
   }
-
+  
   public clearFilters(): void {
-    this.welcomeFilter = 'all';
-    this.techFilter = 'all';
-    this.searchTerm = '';
-    this.applySortersAndFilters();
+    this.dashboardFacade.clearFilters();
   }
 
   public hasActiveFilters(): boolean {
-    return this.welcomeFilter !== 'all' || 
-           this.techFilter !== 'all' || 
-           this.searchTerm.trim() !== '';
+    return this.dashboardFacade.hasActiveFilters(this.currentFilters);
   }
 
-  // ===========================
-  // MÉTODOS DE COLORES DE EVENTOS
-  // ===========================
-
-  /**
-   * Obtiene el color del evento desde el mapa construido con datos reales
-   */
-  public getEventColor(eventTitle: string | null): string | null {
-    if (!eventTitle) return null;
-    return this.eventColors[eventTitle] || '#6b7280'; // Color gris por defecto
+  // Getters y setters para mantener compatibilidad con el template
+  public get welcomeFilter(): FilterStatus { return this.currentFilters.welcomeFilter; }
+  public set welcomeFilter(value: FilterStatus) {
+    this.dashboardFacade.updateFilters({ welcomeFilter: value });
   }
 
-  /**
-   * Obtiene información completa del evento
-   */
+  public get techFilter(): FilterStatus { return this.currentFilters.techFilter; }
+  public set techFilter(value: FilterStatus) {
+    this.dashboardFacade.updateFilters({ techFilter: value });
+  }
+
+  public get searchTerm(): string { return this.currentFilters.searchTerm; }
+  public set searchTerm(value: string) {
+    this.dashboardFacade.updateFilters({ searchTerm: value });
+  }
+
+  public get sortKey(): SortKey { return this.currentSort.sortKey; }
+  public get sortDirection(): SortDirection { return this.currentSort.sortDirection; }
+
+  // ===========================
+  // MÉTODOS DE EVENTOS SIMPLIFICADOS
+  // ===========================
+  
+  public getEventColor(eventTitle: string | null): string {
+    if (!this.dashboardData) return '#6b7280';
+    return this.dashboardFacade.getEventColor(eventTitle, this.dashboardData.eventColors);
+  }
+
   public getEventInfo(eventTitle: string | null): OnboardingEvent | null {
-    if (!eventTitle) return null;
-    return this.onboardingEvents.find(event => event.title === eventTitle) || null;
+    if (!this.dashboardData) return null;
+    return this.dashboardFacade.getEventInfo(eventTitle, this.dashboardData.events);
   }
 
-  /**
-   * Verifica si un evento existe y está activo
-   */
   public isEventActive(eventTitle: string | null): boolean {
-    if (!eventTitle) return false;
     const event = this.getEventInfo(eventTitle);
     return event ? event.isActive : false;
+  }
+
+  public refreshEventColors(): void {
+    this.loadCollaborators(); // Simplificado: solo recarga todo
   }
 
   // ===========================
   // MÉTODOS DE ESTADÍSTICAS
   // ===========================
+  
   public getStatistics(): Statistics {
-    const total = this.masterCollaborators.length;
-    const welcomeCompleted = this.masterCollaborators.filter(c => c.welcomeOnboardingStatus).length;
-    const techCompleted = this.masterCollaborators.filter(c => c.techOnboardingStatus).length;
-    const pending = this.masterCollaborators.filter(c => 
-      !c.welcomeOnboardingStatus || !c.techOnboardingStatus
-    ).length;
-
-    return {
-      total,
-      welcomeCompleted,
-      techCompleted,
-      pending
-    };
+    return this.statistics;
   }
 
   // ===========================
-  // MÉTODOS DE GESTIÓN DE MODALES
+  // MÉTODOS DE GESTIÓN DE MODALES (SIN CAMBIOS)
   // ===========================
+  
   public openAddModal(): void {
     this.collaboratorToEdit = null;
     this.isModalOpen = true;
@@ -336,10 +245,11 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   // ===========================
-  // MÉTODOS DE ACCIONES DE TABLA
+  // MÉTODOS DE ACCIONES SIMPLIFICADOS
   // ===========================
+  
   public onEdit(collaborator: Collaborator): void {
-    this.collaboratorToEdit = { ...collaborator }; // Clonar para evitar mutaciones
+    this.collaboratorToEdit = { ...collaborator };
     this.isModalOpen = true;
   }
 
@@ -351,7 +261,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   public handleDeleteConfirm(): void {
     if (this.collaboratorIdToDelete === null) return;
 
-    this.collaboratorService.deleteCollaborator(this.collaboratorIdToDelete)
+    this.dashboardFacade.deleteCollaborator(this.collaboratorIdToDelete)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
@@ -377,29 +287,29 @@ export class DashboardComponent implements OnInit, OnDestroy {
     
     const newStatus = !currentStatus;
 
-    this.collaboratorService.updateOnboardingStatus(collaborator.id, type, newStatus)
+    this.dashboardFacade.updateOnboardingStatus(collaborator.id, type, newStatus)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          // Actualizar el estado local inmediatamente para mejor UX
+          // Actualizar el estado local inmediatamente
           if (type === 'welcome') {
             collaborator.welcomeOnboardingStatus = newStatus;
           } else {
             collaborator.techOnboardingStatus = newStatus;
           }
-          this.applySortersAndFilters();
+          this.updateDisplayData();
         },
         error: (error) => {
           console.error('Error al actualizar el estado:', error);
-          // Recargar datos en caso de error para mantener consistencia
           this.loadCollaborators();
         }
       });
   }
 
   // ===========================
-  // MÉTODOS UTILITARIOS
+  // MÉTODOS UTILITARIOS (SIN CAMBIOS)
   // ===========================
+  
   public trackByCollaboratorId(index: number, collaborator: Collaborator): number {
     return collaborator.id;
   }

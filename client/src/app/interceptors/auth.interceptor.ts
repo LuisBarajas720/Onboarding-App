@@ -10,7 +10,6 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
   // Si hay token y la request no es de login/register, agregar Authorization header
   if (token && !req.url.includes('/auth/login') && !req.url.includes('/auth/register')) {
-    console.log('🔑 Agregando token a request:', req.url);
     const authReq = req.clone({
       headers: req.headers.set('Authorization', `Bearer ${token}`)
     });
