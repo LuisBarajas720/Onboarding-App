@@ -26,7 +26,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/v1/collaborators")
-@CrossOrigin(origins = "http://localhost:4200")
+@CrossOrigin(origins = "*")
 @Tag(name = "Collaborators", description = "Gestión de colaboradores y su proceso de onboarding")
 @SecurityRequirement(name = "bearerAuth")
 public class CollaboratorController {

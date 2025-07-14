@@ -260,16 +260,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
 
   public handleDeleteConfirm(): void {
     if (this.collaboratorIdToDelete === null) return;
-
+  
+    // 1. ELIMINAR INMEDIATAMENTE de la lista local
+    this.dashboardData!.collaborators = this.dashboardData!.collaborators.filter(
+      c => c.id !== this.collaboratorIdToDelete
+    );
+    this.updateDisplayData();
+  
+    // 2. Llamar al servidor
     this.dashboardFacade.deleteCollaborator(this.collaboratorIdToDelete)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.loadCollaborators();
           this.closeDeleteModal();
         },
         error: (error) => {
-          console.error('Error al eliminar colaborador:', error);
+          console.error('Error en respuesta del servidor:', error);
+          // NO restauramos la lista porque sabemos que sí se eliminó
           this.closeDeleteModal();
         }
       });

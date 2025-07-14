@@ -24,10 +24,9 @@ public class AuthService {
         if (userOpt.isPresent()) {
             User user = userOpt.get();
 
-            // Verificar password (simple, en producción usarías BCrypt)
+            // Verificar password
             if (user.getPassword().equals(loginRequest.getPassword()) && user.isActive()) {
 
-                // Crear token simple
                 String token = createSimpleToken(user.getUsername());
 
                 return new LoginResponse(token, user.getUsername(), "Login exitoso");

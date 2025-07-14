@@ -61,7 +61,12 @@ public class CollaboratorService {
     public void deleteCollaborator(Long id) {
         Collaborator collaborator = collaboratorRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Colaborador no encontrado con id: " + id));
-        collaboratorRepository.delete(collaborator);
+
+        try {
+            collaboratorRepository.delete(collaborator);
+        } catch (Exception e) {
+            throw new RuntimeException("Error al eliminar colaborador de la base de datos", e);
+        }
     }
 
     public Collaborator updateOnboardingStatus(Long id, String onboardingType, boolean status) {
