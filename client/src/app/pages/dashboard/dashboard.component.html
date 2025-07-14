@@ -184,8 +184,8 @@
   <app-collaborator-form
     *ngIf="isModalOpen"
     [collaboratorToEdit]="collaboratorToEdit"
-    (collaboratorAdded)="onFormSubmitSuccess()"
-    (collaboratorUpdated)="onFormSubmitSuccess()"
+    (collaboratorAdded)="onCollaboratorAdded()"
+    (collaboratorUpdated)="onCollaboratorUpdated()"
     (modalClosed)="closeModal()">
   </app-collaborator-form>
 </app-modal>

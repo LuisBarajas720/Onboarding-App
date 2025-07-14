@@ -283,10 +283,19 @@ export class DashboardComponent implements OnInit, OnDestroy {
   }
 
   public onFormSubmitSuccess(): void {
-    this.loadCollaborators();
-    this.closeModal();
+    this.initializeDashboard();
   }
 
+  public onCollaboratorAdded(): void {
+    this.initializeDashboard();
+    this.closeModal();
+  }
+  
+  public onCollaboratorUpdated(): void {
+    this.initializeDashboard();
+    this.closeModal();
+  }
+  
   public onStatusChange(collaborator: Collaborator, type: OnboardingType): void {
     const currentStatus = type === 'welcome' 
       ? collaborator.welcomeOnboardingStatus 

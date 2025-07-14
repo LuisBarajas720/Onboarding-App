@@ -63,8 +63,9 @@ export class CollaboratorService {
   /**
    * Elimina un colaborador del backend.
    */
-  deleteCollaborator(id: number): Observable<void> {
-    return this.http.delete<void>(`${this.apiUrl}/${id}`);
+
+  deleteCollaborator(id: number): Observable<any> {
+    return this.http.delete(`${this.apiUrl}/${id}`, { responseType: 'text' });
   }
 
   /**
